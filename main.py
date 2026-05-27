@@ -1,7 +1,6 @@
 #!C:/Users/Vasan/AppData/Local/Programs/Python/Python311/python.exe
 
 import pymysql
-import cgitb
 import sys
 import os
 
