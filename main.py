@@ -28,238 +28,238 @@ except Exception as e:
 def home():
     form = request.form
 
-# ========== HOSPITAL REGISTRATION ==========
-        hregister = form.get("hregister")
-        if hregister is not None:
-            try:
-                hname = form.get("hname");
-                htype = form.get("htype");
-                hlic = form.get("hlic")
-                hyear = form.get("hyear");
-                hemail = form.get("hemail");
-                hmobile = form.get("hmobile")
-                hemcnum = form.get("hemcnum");
-                hstate = form.get("hstate");
-                hdistrict = form.get("hdistrict")
-                hcity = form.get("hcity");
-                hpin = form.get("hpin");
-                hstreet = form.get("hstreet")
-                harea = form.get("harea");
-                hbed = form.get("hbed");
-                hicu = form.get("hicu")
-                hemc = form.get("hemc");
-                hambulance = form.get("hambulance");
-                hbbank = form.get("hbbank")
-                hpharmacy = form.get("hpharmacy");
-                hservice = form.get("hservice");
-                hwtime = form.get("hwtime")
-                hopdtime = form.get("hopdtime");
-                oname = form.get("oname");
-                odob = form.get("odob")
-                ogender = form.get("ogender");
-                oid = form.get("oid");
-                oidnum = form.get("oidnum")
-                otype = form.get("otype")
-
-        cur.execute("SELECT email_id FROM hospital WHERE email_id = %s", (hemail,))
-        if cur.fetchone():
-            print(
-                '<script>alert("Email already registered! Please use a different email address.");window.location.href="main.py";</script>')
-            sys.exit()
-
-        os.makedirs("image", exist_ok=True)
-
-
-        def save_file(field):
-            if field in form and form[field].filename:
-                f = form[field];
-                n = os.path.basename(f.filename)
-                open("image/" + n, "wb").write(f.file.read());
-                return n
-            return ""
-
-            
-                    licence_name = save_file('hlicproof');
-                    logo_name = save_file('hlogo')
-                    profile_name = save_file('oprofile');
-                    idproof_name = save_file('oidproof')
-                    ownership_name = save_file('oownership')
-            
-                    cur.execute("""INSERT INTO hospital (hospital_name,hospital_type,license_number,license_proof,
-                        year_of_establishment,hospital_logo,email_id,hospital_mobile,hospital_mobile_emergency,state,
-                        district,city,pincode,street,area,bed,icu,emergency,ambulence,blood_bank,pharmacy,service,
-                        working_time,opd_time,owner_name,owner_dob,owner_gender,owner_profile,id_type,id_number,
-                        id_proof,owner_type,ownership_proof) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                                (hname, htype, hlic, licence_name, hyear, logo_name, hemail, hmobile, hemcnum, hstate, hdistrict,
-                                 hcity, hpin, hstreet, harea, hbed, hicu, hemc, hambulance, hbbank, hpharmacy, hservice, hwtime,
-                                 hopdtime, oname, odob, ogender, profile_name, oid, oidnum, idproof_name, otype, ownership_name))
-                    con.commit()
-                    print('<script>alert("Hospital Registered Successfully! \u2705");window.location.href="main.py";</script>')
+              # ========== HOSPITAL REGISTRATION ==========
+                hregister = form.get("hregister")
+                if hregister is not None:
+                    try:
+                        hname = form.get("hname");
+                        htype = form.get("htype");
+                        hlic = form.get("hlic")
+                        hyear = form.get("hyear");
+                        hemail = form.get("hemail");
+                        hmobile = form.get("hmobile")
+                        hemcnum = form.get("hemcnum");
+                        hstate = form.get("hstate");
+                        hdistrict = form.get("hdistrict")
+                        hcity = form.get("hcity");
+                        hpin = form.get("hpin");
+                        hstreet = form.get("hstreet")
+                        harea = form.get("harea");
+                        hbed = form.get("hbed");
+                        hicu = form.get("hicu")
+                        hemc = form.get("hemc");
+                        hambulance = form.get("hambulance");
+                        hbbank = form.get("hbbank")
+                        hpharmacy = form.get("hpharmacy");
+                        hservice = form.get("hservice");
+                        hwtime = form.get("hwtime")
+                        hopdtime = form.get("hopdtime");
+                        oname = form.get("oname");
+                        odob = form.get("odob")
+                        ogender = form.get("ogender");
+                        oid = form.get("oid");
+                        oidnum = form.get("oidnum")
+                        otype = form.get("otype")
+        
+                cur.execute("SELECT email_id FROM hospital WHERE email_id = %s", (hemail,))
+                if cur.fetchone():
+                    print(
+                        '<script>alert("Email already registered! Please use a different email address.");window.location.href="main.py";</script>')
                     sys.exit()
+        
+                os.makedirs("image", exist_ok=True)
+        
+        
+                def save_file(field):
+                    if field in form and form[field].filename:
+                        f = form[field];
+                        n = os.path.basename(f.filename)
+                        open("image/" + n, "wb").write(f.file.read());
+                        return n
+                    return ""
+        
+                    
+                            licence_name = save_file('hlicproof');
+                            logo_name = save_file('hlogo')
+                            profile_name = save_file('oprofile');
+                            idproof_name = save_file('oidproof')
+                            ownership_name = save_file('oownership')
+                    
+                            cur.execute("""INSERT INTO hospital (hospital_name,hospital_type,license_number,license_proof,
+                                year_of_establishment,hospital_logo,email_id,hospital_mobile,hospital_mobile_emergency,state,
+                                district,city,pincode,street,area,bed,icu,emergency,ambulence,blood_bank,pharmacy,service,
+                                working_time,opd_time,owner_name,owner_dob,owner_gender,owner_profile,id_type,id_number,
+                                id_proof,owner_type,ownership_proof) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+                                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                                        (hname, htype, hlic, licence_name, hyear, logo_name, hemail, hmobile, hemcnum, hstate, hdistrict,
+                                         hcity, hpin, hstreet, harea, hbed, hicu, hemc, hambulance, hbbank, hpharmacy, hservice, hwtime,
+                                         hopdtime, oname, odob, ogender, profile_name, oid, oidnum, idproof_name, otype, ownership_name))
+                            con.commit()
+                            print('<script>alert("Hospital Registered Successfully! \u2705");window.location.href="main.py";</script>')
+                            sys.exit()
+                    
+                        except pymysql.IntegrityError as e:
+                            con.rollback()
+                            em = "Email already registered!" if "email_id" in str(
+                                e) else "Mobile already registered!" if "hospital_mobile" in str(
+                                e) else "License number already exists!" if "license_number" in str(e) else "This record already exists."
+                            print(f'<script>alert("{em}");window.location.href="main.py";</script>');
+                            sys.exit()
+                        except Exception as e:
+                            con.rollback()
+                            print(f'<script>alert("Registration Failed: {str(e)}");window.location.href="main.py";</script>');
+                            sys.exit()
+
+                # ========== PARENT REGISTRATION ==========
+                    pregister = form.get("pregister")
+                    if pregister is not None:
+                        try:
+                            ptype = form.get("ptype");
+                            pname = form.get("pname");
+                            pgender = form.get("pgender")
+                            pdob = form.get("pdob");
+                            pmobile = form.get("pmobile");
+                            pemail = form.get("pemail")
+                            palternum = form.get("palternum") or "";
+                            pstate = form.get("pstate")
+                            pdistrict = form.get("pdistrict");
+                            pcity = form.get("pcity");
+                            ppin = form.get("ppin")
+                            pstreet = form.get("pstreet");
+                            parea = form.get("parea");
+                            pid = form.get("pid")
+                            pidnum = form.get("pidnum");
+                            corder = form.get("corder")
             
-                except pymysql.IntegrityError as e:
-                    con.rollback()
-                    em = "Email already registered!" if "email_id" in str(
-                        e) else "Mobile already registered!" if "hospital_mobile" in str(
-                        e) else "License number already exists!" if "license_number" in str(e) else "This record already exists."
-                    print(f'<script>alert("{em}");window.location.href="main.py";</script>');
-                    sys.exit()
-                except Exception as e:
-                    con.rollback()
-                    print(f'<script>alert("Registration Failed: {str(e)}");window.location.href="main.py";</script>');
-                    sys.exit()
+                                cur.execute("SELECT email_id FROM parent WHERE email_id = %s", (pemail,))
+                                if cur.fetchone():
+                                    print(
+                                        '<script>alert("Email already registered! Please use a different email address.");window.location.href="main.py";</script>')
+                                    sys.exit()
+                        
+                                os.makedirs("image", exist_ok=True)
+                        
+                        
+                                def save_file(field):
+                                    if field in form and form[field].filename:
+                                        f = form[field];
+                                        n = os.path.basename(f.filename)
+                                        open("image/" + n, "wb").write(f.file.read());
+                                        return n
+                                    return ""
+            
+            
+                                pprofile_name = save_file('pprofile');
+                                pidproof_name = save_file('pidproof')
+                        
+                                cur.execute("""INSERT INTO parent (parent_type,parent_name,parent_gender,parent_dob,parent_mobile,
+                                    email_id,parent_profile,alternate_mobile,state,district,city,pincode,street,area,id_type,
+                                    id_number,id_proof,child_order) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                                            (ptype, pname, pgender, pdob, pmobile, pemail, pprofile_name, palternum, pstate, pdistrict,
+                                             pcity, ppin, pstreet, parea, pid, pidnum, pidproof_name, corder))
+                                con.commit()
+                                print('<script>alert("Parent Registered Successfully! \u2705");window.location.href="main.py";</script>')
+                                sys.exit()
+                        
+                            except pymysql.IntegrityError as e:
+                                con.rollback()
+                                em = "Email already registered!" if "email_id" in str(
+                                    e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
+                                print(f'<script>alert("{em}");window.location.href="main.py";</script>');
+                                sys.exit()
+                            except Exception as e:
+                                con.rollback()
+                                print(f'<script>alert("Registration Failed: {str(e)}");window.location.href="main.py";</script>');
+                                sys.exit()
 
-# ========== PARENT REGISTRATION ==========
-        pregister = form.get("pregister")
-        if pregister is not None:
-            try:
-                ptype = form.get("ptype");
-                pname = form.get("pname");
-                pgender = form.get("pgender")
-                pdob = form.get("pdob");
-                pmobile = form.get("pmobile");
-                pemail = form.get("pemail")
-                palternum = form.get("palternum") or "";
-                pstate = form.get("pstate")
-                pdistrict = form.get("pdistrict");
-                pcity = form.get("pcity");
-                ppin = form.get("ppin")
-                pstreet = form.get("pstreet");
-                parea = form.get("parea");
-                pid = form.get("pid")
-                pidnum = form.get("pidnum");
-                corder = form.get("corder")
-
-                    cur.execute("SELECT email_id FROM parent WHERE email_id = %s", (pemail,))
-                    if cur.fetchone():
-                        print(
-                            '<script>alert("Email already registered! Please use a different email address.");window.location.href="main.py";</script>')
+                    # ========== FORGOT PASSWORD ==========
+                    forgot_password = form.get("forgot_password")
+                    if forgot_password is not None:
+                        forgot_email = form.get("forgot_email")
+                        forgot_user = form.get("forgot_user_id")
+                        forgot_role = form.get("forgot_role")
+                        try:
+                            if forgot_role == "hospital":
+                                cur.execute("SELECT password, hospital_name FROM hospital WHERE email_id=%s AND user_id=%s",
+                                            (forgot_email, forgot_user))
+                                result = cur.fetchone()
+                                if result:
+                                    pw, name = result
+                                    print(
+                                        f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="main.py";</script>')
+                                else:
+                                    print(
+                                        '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="main.py";</script>')
+                            elif forgot_role == "parent":
+                                cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
+                                            (forgot_email, forgot_user))
+                                result = cur.fetchone()
+                                if result:
+                                    pw, name = result
+                                    print(
+                                        f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="main.py";</script>')
+                                else:
+                                    print(
+                                        '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="main.py";</script>')
+                        except Exception as e:
+                            print(f'<script>alert("Error: {str(e)}");window.location.href="main.py";</script>')
                         sys.exit()
-            
-                    os.makedirs("image", exist_ok=True)
-            
-            
-                    def save_file(field):
-                        if field in form and form[field].filename:
-                            f = form[field];
-                            n = os.path.basename(f.filename)
-                            open("image/" + n, "wb").write(f.file.read());
-                            return n
-                        return ""
-
-
-                    pprofile_name = save_file('pprofile');
-                    pidproof_name = save_file('pidproof')
-            
-                    cur.execute("""INSERT INTO parent (parent_type,parent_name,parent_gender,parent_dob,parent_mobile,
-                        email_id,parent_profile,alternate_mobile,state,district,city,pincode,street,area,id_type,
-                        id_number,id_proof,child_order) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                                (ptype, pname, pgender, pdob, pmobile, pemail, pprofile_name, palternum, pstate, pdistrict,
-                                 pcity, ppin, pstreet, parea, pid, pidnum, pidproof_name, corder))
-                    con.commit()
-                    print('<script>alert("Parent Registered Successfully! \u2705");window.location.href="main.py";</script>')
-                    sys.exit()
-            
-                except pymysql.IntegrityError as e:
-                    con.rollback()
-                    em = "Email already registered!" if "email_id" in str(
-                        e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
-                    print(f'<script>alert("{em}");window.location.href="main.py";</script>');
-                    sys.exit()
-                except Exception as e:
-                    con.rollback()
-                    print(f'<script>alert("Registration Failed: {str(e)}");window.location.href="main.py";</script>');
-                    sys.exit()
-
-# ========== FORGOT PASSWORD ==========
-forgot_password = form.get("forgot_password")
-if forgot_password is not None:
-    forgot_email = form.get("forgot_email")
-    forgot_user = form.get("forgot_user_id")
-    forgot_role = form.get("forgot_role")
-    try:
-        if forgot_role == "hospital":
-            cur.execute("SELECT password, hospital_name FROM hospital WHERE email_id=%s AND user_id=%s",
-                        (forgot_email, forgot_user))
-            result = cur.fetchone()
-            if result:
-                pw, name = result
-                print(
-                    f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="main.py";</script>')
-            else:
-                print(
-                    '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="main.py";</script>')
-        elif forgot_role == "parent":
-            cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
-                        (forgot_email, forgot_user))
-            result = cur.fetchone()
-            if result:
-                pw, name = result
-                print(
-                    f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="main.py";</script>')
-            else:
-                print(
-                    '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="main.py";</script>')
-    except Exception as e:
-        print(f'<script>alert("Error: {str(e)}");window.location.href="main.py";</script>')
-    sys.exit()
-
-# ========== LOGIN PROCESSING ==========
-admin_submit = form.get("admin_login")
-if admin_submit is not None:
-    userid = form.get("admin_user_id");
-    password = form.get("admin_password")
-    if userid and password:
-        cur.execute("SELECT id FROM admin WHERE user_id = %s AND password = %s", (userid, password))
-        r = cur.fetchone()
-        if r:
-            print(
-                f'<script>alert("Admin login successful!");location.href="admin_dashboard.py?admin_id={int(r[0])}";</script>');
-            sys.exit()
-        else:
-            print('<script>alert("Invalid Admin credentials!");</script>')
-
-hospital_submit = form.get("hospital_login")
-if hospital_submit is not None:
-    userid = form.get("hospital_user_id");
-    password = form.get("hospital_password")
-    if userid and password:
-        cur.execute("SELECT id FROM hospital WHERE user_id = %s AND password = %s", (userid, password))
-        r = cur.fetchone()
-        if r:
-            print(
-                f'<script>alert("Hospital login successful!");location.href="hospital_dashboard.py?hospital_id={int(r[0])}";</script>');
-            sys.exit()
-        else:
-            print('<script>alert("Invalid Hospital credentials!");</script>')
-
-parent_submit = form.get("parent_login")
-if parent_submit is not None:
-    userid = form.get("parent_user_id");
-    password = form.get("parent_password")
-    if userid and password:
-        cur.execute("SELECT id FROM parent WHERE user_id = %s AND password = %s", (userid, password))
-        r = cur.fetchone()
-        if r:
-            print(
-                f'<script>alert("Parent login successful!");location.href="parent_dashboard.py?parent_id={int(r[0])}";</script>');
-            sys.exit()
-        else:
-            print('<script>alert("Invalid Parent credentials!");</script>')
-
-
-# ========== DB COUNTERS ==========
-def get_count(q):
-    try:
-        cur.execute(q); r = cur.fetchone(); return int(r[0]) if r else 0
-    except:
-        return 0
-
-
-cnt_children = get_count("SELECT COUNT(*) FROM manage_child")
-cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
-cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
+                    
+                    # ========== LOGIN PROCESSING ==========
+                    admin_submit = form.get("admin_login")
+                    if admin_submit is not None:
+                        userid = form.get("admin_user_id");
+                        password = form.get("admin_password")
+                        if userid and password:
+                            cur.execute("SELECT id FROM admin WHERE user_id = %s AND password = %s", (userid, password))
+                            r = cur.fetchone()
+                            if r:
+                                print(
+                                    f'<script>alert("Admin login successful!");location.href="admin_dashboard.py?admin_id={int(r[0])}";</script>');
+                                sys.exit()
+                            else:
+                                print('<script>alert("Invalid Admin credentials!");</script>')
+                    
+                    hospital_submit = form.get("hospital_login")
+                    if hospital_submit is not None:
+                        userid = form.get("hospital_user_id");
+                        password = form.get("hospital_password")
+                        if userid and password:
+                            cur.execute("SELECT id FROM hospital WHERE user_id = %s AND password = %s", (userid, password))
+                            r = cur.fetchone()
+                            if r:
+                                print(
+                                    f'<script>alert("Hospital login successful!");location.href="hospital_dashboard.py?hospital_id={int(r[0])}";</script>');
+                                sys.exit()
+                            else:
+                                print('<script>alert("Invalid Hospital credentials!");</script>')
+                    
+                    parent_submit = form.get("parent_login")
+                    if parent_submit is not None:
+                        userid = form.get("parent_user_id");
+                        password = form.get("parent_password")
+                        if userid and password:
+                            cur.execute("SELECT id FROM parent WHERE user_id = %s AND password = %s", (userid, password))
+                            r = cur.fetchone()
+                            if r:
+                                print(
+                                    f'<script>alert("Parent login successful!");location.href="parent_dashboard.py?parent_id={int(r[0])}";</script>');
+                                sys.exit()
+                            else:
+                                print('<script>alert("Invalid Parent credentials!");</script>')
+                    
+                    
+                    # ========== DB COUNTERS ==========
+                    def get_count(q):
+                        try:
+                            cur.execute(q); r = cur.fetchone(); return int(r[0]) if r else 0
+                        except:
+                            return 0
+                    
+                    
+                    cnt_children = get_count("SELECT COUNT(*) FROM manage_child")
+                    cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
+                    cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
 
 # ========== HTML ==========
 print(f"""<!DOCTYPE html>
