@@ -97,7 +97,7 @@ def home():
             print('<script>alert("Hospital Registered Successfully! \u2705");window.location.href="main.py";</script>')
             sys.exit()
                         
-         except pymysql.IntegrityError as e:
+        except pymysql.IntegrityError as e:
             con.rollback()
             em = "Email already registered!" if "email_id" in str(
                 e) else "Mobile already registered!" if "hospital_mobile" in str(
