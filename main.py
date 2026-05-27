@@ -4,7 +4,7 @@ import pymysql
 import sys
 import os
 
-cgitb.enable()
+
 sys.stdout.reconfigure(encoding="utf-8")
 print("Content-Type: text/html\r\n\r\n")
 
