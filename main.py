@@ -3,7 +3,7 @@
 import pymysql
 import sys
 import os
-import cgi
+from flask import request
 
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -22,7 +22,7 @@ except Exception as e:
     print(f"<h2 style='color:red;'>Database Connection Failed!</h2><pre>{e}</pre>")
     sys.exit()
 
-form = cgi.FieldStorage()
+form = request.form
 
 # ========== HOSPITAL REGISTRATION ==========
 hregister = form.getvalue("hregister")
