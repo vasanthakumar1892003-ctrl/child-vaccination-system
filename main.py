@@ -5,6 +5,7 @@ import sys
 import os
 import cgi
 
+
 sys.stdout.reconfigure(encoding="utf-8")
 print("Content-Type: text/html\r\n\r\n")
 
