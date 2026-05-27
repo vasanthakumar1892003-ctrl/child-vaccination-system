@@ -9,7 +9,13 @@ sys.stdout.reconfigure(encoding="utf-8")
 print("Content-Type: text/html\r\n\r\n")
 
 try:
-    con = pymysql.connect(host="localhost", user="root", password="", database="cvsdp")
+    con = pymysql.connect(
+    host=os.environ.get("MYSQLHOST"),
+    user=os.environ.get("MYSQLUSER"),
+    password=os.environ.get("MYSQLPASSWORD"),
+    database=os.environ.get("MYSQLDATABASE"),
+    port=int(os.environ.get("MYSQLPORT"))
+)
     cur = con.cursor()
 except Exception as e:
     print(f"<h2 style='color:red;'>Database Connection Failed!</h2><pre>{e}</pre>")
