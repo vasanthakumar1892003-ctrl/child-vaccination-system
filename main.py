@@ -1,14 +1,11 @@
-#!C:/Users/Vasan/AppData/Local/Programs/Python/Python311/python.exe
-
 import pymysql
 import sys
 import os
-from flask import Flask, request, render_template
+from flask import Flask, request
 
 app = Flask(__name__)
 
 sys.stdout.reconfigure(encoding="utf-8")
-print("Content-Type: text/html\r\n\r\n")
 
 try:
     con = pymysql.connect(
@@ -75,7 +72,7 @@ def home():
                  n = os.path.basename(f.filename)
                  open("image/" + n, "wb").write(f.file.read());
                  return n
-            return ""
+              return ""
                         
             licence_name = save_file('hlicproof');
             logo_name = save_file('hlogo')
@@ -144,7 +141,7 @@ def home():
                       n = os.path.basename(f.filename)
                       open("image/" + n, "wb").write(f.file.read());
                       return n
-                return ""
+                   return ""
             
             
                 pprofile_name = save_file('pprofile');
@@ -257,11 +254,10 @@ def home():
         cnt_children = get_count("SELECT COUNT(*) FROM manage_child")
         cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
         cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
-
-    return render_template("index.html")   
+  
 
         # ========== HTML ==========
-        print(f"""<!DOCTYPE html>
+        retuen f"""<!DOCTYPE html>
         <html lang="en">
         <head>
         <meta charset="UTF-8">
@@ -1123,7 +1119,7 @@ def home():
         </script>
         </body>
         </html>
-        """)
+        """
         
         cur.close()
         con.close()
