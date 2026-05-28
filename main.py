@@ -257,7 +257,7 @@ def home():
   
 
         # ========== HTML ==========
-        retuen f"""<!DOCTYPE html>
+        return f"""<!DOCTYPE html>
         <html lang="en">
         <head>
         <meta charset="UTF-8">
