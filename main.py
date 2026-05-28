@@ -188,7 +188,7 @@ def home():
                    else:
                         print(
                             '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="main.py";</script>')
-                 elif forgot_role == "parent":
+                elif forgot_role == "parent":
                     cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
                         (forgot_email, forgot_user))
                     result = cur.fetchone()
