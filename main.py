@@ -214,7 +214,7 @@ def home():
                 if r:
                     print(
                         f'<script>alert("Admin login successful!");location.href="admin_dashboard.py?admin_id={int(r[0])}";</script>');
-                     sys.exit()
+                    sys.exit()
                 else:
                     print('<script>alert("Invalid Admin credentials!");</script>')
                     
