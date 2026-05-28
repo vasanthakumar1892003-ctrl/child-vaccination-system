@@ -201,7 +201,7 @@ def home():
                             '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="main.py";</script>')
             except Exception as e:
                 print(f'<script>alert("Error: {str(e)}");window.location.href="main.py";</script>')
-            sys.exit()
+                sys.exit()
                     
         # ========== LOGIN PROCESSING ==========
         admin_submit = form.get("admin_login")
