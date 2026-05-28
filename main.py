@@ -26,6 +26,7 @@ except Exception as e:
 @app.route("/", methods=["GET", "POST"])
 def home():
     form = request.form
+    return "Child Vaccination System Running Successfully!"
 
     # ========== HOSPITAL REGISTRATION ==========
     hregister = form.get("hregister")
