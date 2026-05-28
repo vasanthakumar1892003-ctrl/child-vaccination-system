@@ -1,12 +1,11 @@
 import pymysql
-import sys
 import os
 from flask import Flask, request
 
 app = Flask(__name__)
 
-sys.stdout.reconfigure(encoding="utf-8")
 
+db_error = None
 try:
     con = pymysql.connect(
     host=os.environ.get("MYSQLHOST"),
@@ -17,11 +16,14 @@ try:
 )
     cur = con.cursor()
 except Exception as e:
-    print(f"<h2 style='color:red;'>Database Connection Failed!</h2><pre>{e}</pre>")
-    sys.exit()
+    con = None
+    cur = None
+    db_error = str(e)
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    if db_error:
+        return f"<h2 style='color:red;'>Database Connection Failed!</h2><pre>{db_error}</pre>", 500
     form = request.form
 
     # ========== HOSPITAL REGISTRATION ==========
@@ -59,20 +61,20 @@ def home():
         
             cur.execute("SELECT email_id FROM hospital WHERE email_id = %s", (hemail,))
             if cur.fetchone():
-                print(
-                    '<script>alert("Email already registered! Please use a different email address.");window.location.href="main.py";</script>')
-                sys.exit()
-            
+                return '<script>alert("Email already registered! Please use a different email address.");window.location.href="/";</script>'
             os.makedirs("image", exist_ok=True)
             
             
             def save_file(field):
-              if field in form and form[field].filename:
-                 f = form[field];
-                 n = os.path.basename(f.filename)
-                 open("image/" + n, "wb").write(f.file.read());
-                 return n
-              return ""
+                if field in request.files:
+                    f = request.files[field]
+                       
+                    if f.filename != "":
+                        n = os.path.basename(f.filename)
+                        with open("image/" + n, "wb") as file:
+                            file.write(f.read())
+                        return n
+                return ""
                         
             licence_name = save_file('hlicproof');
             logo_name = save_file('hlogo')
@@ -90,20 +92,17 @@ def home():
                             hcity, hpin, hstreet, harea, hbed, hicu, hemc, hambulance, hbbank, hpharmacy, hservice, hwtime,
                             hopdtime, oname, odob, ogender, profile_name, oid, oidnum, idproof_name, otype, ownership_name))
             con.commit()
-            print('<script>alert("Hospital Registered Successfully! \u2705");window.location.href="main.py";</script>')
-            sys.exit()
+            return '<script>alert("Hospital Registered Successfully! \u2705");window.location.href="/";</script>'
                         
         except pymysql.IntegrityError as e:
             con.rollback()
             em = "Email already registered!" if "email_id" in str(
                 e) else "Mobile already registered!" if "hospital_mobile" in str(
                 e) else "License number already exists!" if "license_number" in str(e) else "This record already exists."
-            print(f'<script>alert("{em}");window.location.href="main.py";</script>');
-            sys.exit()
+            return f'<script>alert("{em}");window.location.href="/";</script>'
         except Exception as e:
             con.rollback()
-            print(f'<script>alert("Registration Failed: {str(e)}");window.location.href="main.py";</script>');
-            sys.exit()           
+            return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'           
 
         # ========== PARENT REGISTRATION ==========
         pregister = form.get("pregister")
@@ -128,21 +127,20 @@ def home():
             
                 cur.execute("SELECT email_id FROM parent WHERE email_id = %s", (pemail,))
                 if cur.fetchone():
-                    print(
-                        '<script>alert("Email already registered! Please use a different email address.");window.location.href="main.py";</script>')
-                    sys.exit()
-                        
+                    return '<script>alert("Email already registered! Please use a different email address.");window.location.href="/";</script>'
                 os.makedirs("image", exist_ok=True)
                         
                         
                 def save_file(field):
-                   if field in form and form[field].filename:
-                      f = form[field];
-                      n = os.path.basename(f.filename)
-                      open("image/" + n, "wb").write(f.file.read());
-                      return n
-                   return ""
-            
+                    if field in request.files:
+                        f = request.files[field]
+                        if f.filename != "":
+                            n = os.path.basename(f.filename)
+                            with open("image/" + n, "wb") as file:
+                                file.write(f.read())
+                            return n
+                    return ""
+
             
                 pprofile_name = save_file('pprofile');
                 pidproof_name = save_file('pidproof')
@@ -153,19 +151,16 @@ def home():
                                     (ptype, pname, pgender, pdob, pmobile, pemail, pprofile_name, palternum, pstate, pdistrict,
                                      pcity, ppin, pstreet, parea, pid, pidnum, pidproof_name, corder))
                 con.commit()
-                print('<script>alert("Parent Registered Successfully! \u2705");window.location.href="main.py";</script>')
-                sys.exit()
+                return '<script>alert("Parent Registered Successfully! \u2705");window.location.href="/";</script>'
                         
             except pymysql.IntegrityError as e:
                 con.rollback()
                 em = "Email already registered!" if "email_id" in str(
                     e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
-                print(f'<script>alert("{em}");window.location.href="main.py";</script>');
-                sys.exit()
+                return f'<script>alert("{em}");window.location.href="/";</script>'
             except Exception as e:
                 con.rollback()
-                print(f'<script>alert("Registration Failed: {str(e)}");window.location.href="main.py";</script>');
-                sys.exit()
+                return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'
 
         # ========== FORGOT PASSWORD ==========
         forgot_password = form.get("forgot_password")
@@ -180,25 +175,20 @@ def home():
                    result = cur.fetchone()
                    if result:
                         pw, name = result
-                        print(
-                            f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="main.py";</script>')
+                        return f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
                    else:
-                        print(
-                            '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="main.py";</script>')
+                        return '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="/";</script>'
                 elif forgot_role == "parent":
                     cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
                         (forgot_email, forgot_user))
                     result = cur.fetchone()
                     if result:
                         pw, name = result
-                        print(
-                            f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="main.py";</script>')
+                        return f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
                     else:
-                        print(
-                            '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="main.py";</script>')
+                        return '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="/";</script>'
             except Exception as e:
-                print(f'<script>alert("Error: {str(e)}");window.location.href="main.py";</script>')
-                sys.exit()
+                return f'<script>alert("Error: {str(e)}");window.location.href="/";</script>'
                     
         # ========== LOGIN PROCESSING ==========
         admin_submit = form.get("admin_login")
@@ -209,11 +199,9 @@ def home():
                 cur.execute("SELECT id FROM admin WHERE user_id = %s AND password = %s", (userid, password))
                 r = cur.fetchone()
                 if r:
-                    print(
-                        f'<script>alert("Admin login successful!");location.href="admin_dashboard.py?admin_id={int(r[0])}";</script>');
-                    sys.exit()
+                    return f'<script>alert("Admin login successful!");location.href="/admin_dashboard?admin_id={int(r[0])}";</script>'
                 else:
-                    print('<script>alert("Invalid Admin credentials!");</script>')
+                    return '<script>alert("Invalid Admin credentials!");</script>'
                     
         hospital_submit = form.get("hospital_login")
         if hospital_submit is not None:
@@ -223,11 +211,9 @@ def home():
                 cur.execute("SELECT id FROM hospital WHERE user_id = %s AND password = %s", (userid, password))
                 r = cur.fetchone()
                 if r:
-                    print(
-                        f'<script>alert("Hospital login successful!");location.href="hospital_dashboard.py?hospital_id={int(r[0])}";</script>');
-                    sys.exit()
+                    return f'<script>alert("Hospital login successful!");location.href="/hospital_dashboard?hospital_id={int(r[0])}";</script>'
                 else:
-                    print('<script>alert("Invalid Hospital credentials!");</script>')
+                    return '<script>alert("Invalid Hospital credentials!");</script>'
                     
         parent_submit = form.get("parent_login")
         if parent_submit is not None:
@@ -237,11 +223,9 @@ def home():
                 cur.execute("SELECT id FROM parent WHERE user_id = %s AND password = %s", (userid, password))
                 r = cur.fetchone()
                 if r:
-                    print(
-                        f'<script>alert("Parent login successful!");location.href="parent_dashboard.py?parent_id={int(r[0])}";</script>');
-                    sys.exit()
+                    return f'<script>alert("Parent login successful!");location.href="/parent_dashboard?parent_id={int(r[0])}";</script>'
                 else:
-                    print('<script>alert("Invalid Parent credentials!");</script>')
+                    return '<script>alert("Invalid Parent credentials!");</script>'
                     
                     
         # ========== DB COUNTERS ==========
@@ -466,7 +450,7 @@ def home():
             </a>
             <ul class="nav-links mb-0">
               <li><a class="nav-link active" href="#"><i class="fa-solid fa-house me-1"></i> Home</a></li>
-              <li><a class="nav-link" href="main_help.py"><i class="fa-solid fa-handshake-angle me-1"></i> Help &amp; Support</a></li>
+              <li><a class="nav-link" href="/help"><i class="fa-solid fa-handshake-angle me-1"></i> Help &amp; Support</a></li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle btn-login-nav" href="#" id="loginDropdown" role="button"
                    data-bs-toggle="dropdown" aria-expanded="false">
@@ -492,7 +476,7 @@ def home():
         <!-- Mobile Menu -->
         <div class="mobile-menu" id="mobileMenu">
           <a class="nav-link" href="#"><i class="fa-solid fa-house me-2"></i>Home</a>
-          <a class="nav-link" href="main_help.py"><i class="fa-solid fa-handshake-angle me-2"></i>Help &amp; Support</a>
+          <a class="nav-link" href="/help"><i class="fa-solid fa-handshake-angle me-2"></i>Help &amp; Support</a>
           <div class="mobile-submenu">
             <div style="font-size:0.78rem;font-weight:700;color:#b0bac9;text-transform:uppercase;letter-spacing:1px;padding:6px 16px 4px;">Login As</div>
             <a href="#" onclick="openLoginModal('admin');closeMobileMenu();return false;"><i class="fa-solid fa-user-shield me-2" style="color:#6c3be0;"></i>Admin</a>
@@ -1042,10 +1026,10 @@ def home():
               <div class="col-lg-2 col-md-6 col-6">
                 <div class="footer-heading">Quick Links</div>
                 <ul class="footer-links">
-                  <li><a href="main.py"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Home</a></li>
-                  <li><a href="main.py"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Profile</a></li>
-                  <li><a href="main.py"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Login</a></li>
-                  <li><a href="main_help.py"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Help</a></li>
+                  <li><a href="/"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Home</a></li>
+                  <li><a href="/"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Profile</a></li>
+                  <li><a href="/"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Login</a></li>
+                  <li><a href="/help"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>Help</a></li>
                 </ul>
               </div>
               <div class="col-lg-4 col-md-6">
@@ -1121,10 +1105,6 @@ def home():
         </html>
         """
         
-        cur.close()
-        con.close()
-        
-        if __name__ == "__main__":
-            import os
-            port = int(os.environ.get("PORT", 5000))
-            app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
