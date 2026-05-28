@@ -258,7 +258,6 @@ def home():
         cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
         cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
 
-    return render_template("index.html")    
 
         # ========== HTML ==========
         print(f"""<!DOCTYPE html>
