@@ -7,10 +7,6 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return render_template("index.html")
-
 sys.stdout.reconfigure(encoding="utf-8")
 print("Content-Type: text/html\r\n\r\n")
 
@@ -261,6 +257,8 @@ def home():
         cnt_children = get_count("SELECT COUNT(*) FROM manage_child")
         cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
         cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
+
+    return render_template("index.html")    
 
         # ========== HTML ==========
         print(f"""<!DOCTYPE html>
