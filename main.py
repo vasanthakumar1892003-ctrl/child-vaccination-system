@@ -3,7 +3,7 @@
 import pymysql
 import sys
 import os
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
@@ -258,6 +258,7 @@ def home():
         cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
         cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
 
+    return render_template("index.html")   
 
         # ========== HTML ==========
         print(f"""<!DOCTYPE html>
