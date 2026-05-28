@@ -1105,6 +1105,173 @@ def home():
     </html>
     """
         
+@app.route("/help")
+def help_page():
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help & Support | Child Vaccination System</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{background:#f0f5fc;font-family:'Plus Jakarta Sans',sans-serif;color:#1a2b42;}
+  .topbar{background:#fff;border-bottom:1px solid #dde6f5;padding:16px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(15,108,189,0.07);}
+  .brand{font-family:'Nunito',sans-serif;font-weight:800;color:#0f6cbd;font-size:1.2rem;text-decoration:none;}
+  .hero{background:linear-gradient(135deg,#0f6cbd,#00c9a7);padding:64px 0 80px;color:white;text-align:center;}
+  .hero h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:2.4rem;margin-bottom:12px;}
+  .hero p{font-size:1.1rem;opacity:.88;}
+  .card-help{background:#fff;border-radius:18px;padding:32px 28px;border:1px solid #dde6f5;box-shadow:0 4px 24px rgba(15,108,189,0.08);transition:transform .25s,box-shadow .25s;}
+  .card-help:hover{transform:translateY(-6px);box-shadow:0 12px 36px rgba(15,108,189,0.14);}
+  .icon-box{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:18px;}
+  .faq-item{background:#fff;border-radius:14px;border:1px solid #dde6f5;margin-bottom:12px;overflow:hidden;}
+  .faq-q{padding:18px 22px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.97rem;}
+  .faq-q:hover{background:#f0f5fc;}
+  .faq-a{padding:0 22px 18px;color:#6b7a99;font-size:.93rem;line-height:1.7;display:none;}
+  .faq-a.open{display:block;}
+  .contact-box{background:linear-gradient(135deg,#0f6cbd,#1a8fe3);border-radius:18px;padding:40px 32px;color:white;text-align:center;}
+  .contact-box h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:1.6rem;margin-bottom:8px;}
+  .btn-back{background:#0f6cbd;color:white;border:none;border-radius:12px;padding:10px 24px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+  .btn-back:hover{background:#0a4d8c;color:white;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="brand" href="/"><i class="fa-solid fa-syringe me-2"></i>Child Vaccination System</a>
+    <a class="btn-back" href="/"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="container">
+    <h1><i class="fa-solid fa-handshake-angle me-3"></i>Help &amp; Support</h1>
+    <p>Find answers, contact us, or explore common questions below.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+
+  <!-- Contact Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card-help text-center">
+        <div class="icon-box mx-auto" style="background:#e8f4ff;color:#0f6cbd;"><i class="fa-solid fa-envelope"></i></div>
+        <h5 style="font-family:'Nunito',sans-serif;font-weight:800;">Email Support</h5>
+        <p class="text-muted small mb-3">Send us your queries anytime. We respond within 24 hours.</p>
+        <a href="mailto:support@cvs.com" class="btn btn-sm" style="background:#e8f4ff;color:#0f6cbd;border-radius:10px;font-weight:700;">support@cvs.com</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-help text-center">
+        <div class="icon-box mx-auto" style="background:#e6fdf8;color:#00b37e;"><i class="fa-solid fa-phone"></i></div>
+        <h5 style="font-family:'Nunito',sans-serif;font-weight:800;">Phone Support</h5>
+        <p class="text-muted small mb-3">Mon – Sat, 9:00 AM – 6:00 PM IST</p>
+        <a href="tel:+911800000000" class="btn btn-sm" style="background:#e6fdf8;color:#00b37e;border-radius:10px;font-weight:700;">1800-000-0000 (Toll Free)</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-help text-center">
+        <div class="icon-box mx-auto" style="background:#fff0f0;color:#ff6b6b;"><i class="fa-solid fa-circle-question"></i></div>
+        <h5 style="font-family:'Nunito',sans-serif;font-weight:800;">Quick Help</h5>
+        <p class="text-muted small mb-3">Browse our FAQ section below for instant answers.</p>
+        <a href="#faq" class="btn btn-sm" style="background:#fff0f0;color:#ff6b6b;border-radius:10px;font-weight:700;">View FAQs</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <h3 id="faq" style="font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:24px;">
+    <i class="fa-solid fa-circle-question me-2" style="color:#0f6cbd;"></i>Frequently Asked Questions
+  </h3>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">How do I register my hospital? <i class="fa-solid fa-chevron-down"></i></div>
+    <div class="faq-a">Click the <strong>Register</strong> button on the home page, select <strong>Hospital</strong>, and fill in your hospital details including license, owner information, and upload required documents. After submission, admin will review and activate your account.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">How do I register as a parent? <i class="fa-solid fa-chevron-down"></i></div>
+    <div class="faq-a">Click <strong>Register</strong> on the home page, select <strong>Parent</strong>, and fill in your personal details and ID proof. Once registered, you can log in and manage your child's vaccination records.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">I forgot my User ID or Password. What should I do? <i class="fa-solid fa-chevron-down"></i></div>
+    <div class="faq-a">On the login modal, click <strong>Forgot User ID / Password</strong>. Enter your registered email and User ID to retrieve your credentials.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">How do I book a vaccination appointment? <i class="fa-solid fa-chevron-down"></i></div>
+    <div class="faq-a">Log in as a Parent, go to your dashboard, add your child's details, and then book an appointment at a nearby registered hospital.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Is my data secure on this platform? <i class="fa-solid fa-chevron-down"></i></div>
+    <div class="faq-a">Yes. All data is stored in a secure MySQL database hosted on Render. Passwords and sensitive information are protected. We do not share your data with any third parties.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">How do I contact the admin? <i class="fa-solid fa-chevron-down"></i></div>
+    <div class="faq-a">Use the Email Support option above or call our toll-free number. Admins can also be reached through the in-system messaging feature available after login.</div>
+  </div>
+
+  <!-- Contact Banner -->
+  <div class="contact-box mt-5">
+    <h3><i class="fa-solid fa-headset me-2"></i>Still need help?</h3>
+    <p style="opacity:.88;margin-bottom:24px;">Our support team is ready to assist you with any issue.</p>
+    <a href="mailto:support@cvs.com" class="btn btn-light fw-bold me-3" style="border-radius:12px;color:#0f6cbd;">
+      <i class="fa-solid fa-envelope me-2"></i>Email Us
+    </a>
+    <a href="/" class="btn fw-bold" style="border-radius:12px;background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.5);">
+      <i class="fa-solid fa-house me-2"></i>Back to Home
+    </a>
+  </div>
+
+</div>
+
+<footer style="background:#1a2b42;color:rgba(255,255,255,0.6);text-align:center;padding:24px;margin-top:60px;font-size:.88rem;">
+  &copy; 2026 Child Vaccination Management System. All rights reserved.
+</footer>
+
+<script>
+function toggleFaq(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('i');
+  const isOpen = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-q i').forEach(i => i.style.transform = '');
+  if (!isOpen) {
+    ans.classList.add('open');
+    icon.style.transform = 'rotate(180deg)';
+  }
+}
+</script>
+</body>
+</html>"""
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 Not Found | CVS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+</head>
+<body style="background:#f0f5fc;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+<div style="text-align:center;padding:40px;">
+  <div style="font-size:5rem;color:#0f6cbd;margin-bottom:16px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+  <h1 style="font-size:4rem;font-weight:900;color:#0f6cbd;margin-bottom:8px;">404</h1>
+  <h2 style="font-weight:700;color:#1a2b42;margin-bottom:12px;">Page Not Found</h2>
+  <p style="color:#6b7a99;margin-bottom:32px;">The page you are looking for doesn't exist or has been moved.</p>
+  <a href="/" style="background:#0f6cbd;color:white;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:700;">
+    <i class="fa-solid fa-house me-2"></i>Back to Home
+  </a>
+</div>
+</body>
+</html>""", 404
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
