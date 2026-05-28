@@ -7,6 +7,10 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+@app.route("/")
+def home():
+    return render_template("index.html")
+
 sys.stdout.reconfigure(encoding="utf-8")
 print("Content-Type: text/html\r\n\r\n")
 
