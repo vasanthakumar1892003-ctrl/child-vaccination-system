@@ -1,13 +1,9 @@
 #!C:/Users/Vasan/AppData/Local/Programs/Python/Python311/python.exe
 
-import cgi
-import cgitb
-import sys
-import json
+from flask import Flask, request, jsonify
 import pymysql
 
-cgitb.enable()
-sys.stdout.reconfigure(encoding="utf-8")
+app = Flask(__name__)
 
 # ── DB ────────────────────────────────────────────────────────────────────────
 def get_db():
@@ -42,48 +38,37 @@ def ensure_table():
     finally:
         con.close()
 
-ensure_table()
+def send_json(ok, msg="", ticket_id=None):
+    payload = {"success": ok, "message": msg}
+    if ticket_id:
+        payload["ticket_id"] = ticket_id
+    return jsonify(payload)
 
-# ── FORM PARAMS ───────────────────────────────────────────────────────────────
-form   = cgi.FieldStorage()
-action = form.getvalue('action', '').strip()
 
-# ============================================================
-# POST HANDLER — save ticket (AJAX)
-# ============================================================
-if action == 'submit_ticket':
-    print("Content-Type: application/json\n")
-
-    def send_json(ok, msg="", ticket_id=None):
-        payload = {"success": ok, "message": msg}
-        if ticket_id:
-            payload["ticket_id"] = ticket_id
-        print(json.dumps(payload))
-        sys.exit()
-
-    full_name     = form.getvalue('full_name',      '').strip()
-    contact_email = form.getvalue('contact_email',  '').strip()
-    user_role     = form.getvalue('user_role',       '').strip()
-    issue_cat     = form.getvalue('issue_category',  '').strip()
-    priority      = form.getvalue('priority',        '').strip()
-    description   = form.getvalue('description',     '').strip()
+def handle_ticket_submission(form):
+    full_name     = form.get('full_name',      '').strip()
+    contact_email = form.get('contact_email',  '').strip()
+    user_role     = form.get('user_role',       '').strip()
+    issue_cat     = form.get('issue_category',  '').strip()
+    priority      = form.get('priority',        '').strip()
+    description   = form.get('description',     '').strip()
 
     if not full_name:
-        send_json(False, "Your name is required.")
+        return send_json(False, "Your name is required.")
     if not contact_email or "@" not in contact_email:
-        send_json(False, "A valid contact email is required.")
+        return send_json(False, "A valid contact email is required.")
     if not user_role or user_role == "-- Select Role --":
-        send_json(False, "Please select your role.")
+        return send_json(False, "Please select your role.")
     if not issue_cat or issue_cat == "-- Select Category --":
-        send_json(False, "Please select an issue category.")
+        return send_json(False, "Please select an issue category.")
     if not priority:
-        send_json(False, "Priority is required.")
+        return send_json(False, "Priority is required.")
     if not description:
-        send_json(False, "Please describe your issue.")
+        return send_json(False, "Please describe your issue.")
 
     con, cur = get_db()
     if con is None:
-        send_json(False, f"Database connection failed: {cur}")
+        return send_json(False, f"Database connection failed: {cur}")
 
     try:
         cur.execute(
@@ -95,7 +80,7 @@ if action == 'submit_ticket':
         con.commit()
         ticket_id = cur.lastrowid
         con.close()
-        send_json(
+        return send_json(
             True,
             f"Support ticket TKT-{ticket_id:05d} submitted successfully! "
             f"Our team will respond within 24 hours.",
@@ -107,15 +92,13 @@ if action == 'submit_ticket':
             con.close()
         except Exception:
             pass
-        send_json(False, f"Database error: {str(e)}")
+        return send_json(False, f"Database error: {str(e)}")
 
 
 # ============================================================
 # PAGE LOAD — GET
 # ============================================================
-print("Content-Type: text/html\n")
-
-print("""<!DOCTYPE html>
+HELP_PAGE_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -946,7 +929,7 @@ function submitTicket() {
   formData.append('priority', priority);
   formData.append('description', description);
 
-  fetch('home_help.py', { method: 'POST', body: formData })
+  fetch(window.location.pathname, { method: 'POST', body: formData })
     .then(r => r.json())
     .then(data => {
       if (data.success) {
@@ -973,4 +956,19 @@ function submitTicket() {
 
 </body>
 </html>
-""")
+"""
+
+
+@app.route("/", methods=["GET", "POST"])
+def help_page():
+    ensure_table()
+    if request.method == "POST":
+        action = request.form.get('action', '').strip()
+        if action == 'submit_ticket':
+            return handle_ticket_submission(request.form)
+    return HELP_PAGE_HTML
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
