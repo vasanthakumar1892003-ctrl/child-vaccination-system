@@ -1,5 +1,3 @@
-#!C:/Users/Vasan/AppData/Local/Programs/Python/Python311/python.exe
-
 from flask import Flask, request, jsonify
 import pymysql
 
