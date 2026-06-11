@@ -450,6 +450,7 @@ def home():
         </a>
         <ul class="nav-links mb-0">
           <li><a class="nav-link active" href="#"><i class="fa-solid fa-house me-1"></i> Home</a></li>
+          <li><a class="nav-link" href="main_help.py"><i class="fa-solid fa-handshake-angle me-1"></i> Help &amp; Support</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle btn-login-nav" href="#" id="loginDropdown" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
@@ -475,6 +476,7 @@ def home():
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
       <a class="nav-link" href="#"><i class="fa-solid fa-house me-2"></i>Home</a>
+      <a class="nav-link" href="main_help.py"><i class="fa-solid fa-handshake-angle me-2"></i>Help &amp; Support</a>
       <div class="mobile-submenu">
         <div style="font-size:0.78rem;font-weight:700;color:#b0bac9;text-transform:uppercase;letter-spacing:1px;padding:6px 16px 4px;">Login As</div>
         <a href="#" onclick="openLoginModal('admin');closeMobileMenu();return false;"><i class="fa-solid fa-user-shield me-2" style="color:#6c3be0;"></i>Admin</a>
