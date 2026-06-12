@@ -104,130 +104,109 @@ def home():
             con.rollback()
             return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'           
 
-        # ========== PARENT REGISTRATION ==========
-        pregister = form.get("pregister")
-        if pregister is not None:
-            try:
-                ptype = form.get("ptype");
-                pname = form.get("pname");
-                pgender = form.get("pgender")
-                pdob = form.get("pdob");
-                pmobile = form.get("pmobile");
-                pemail = form.get("pemail")
-                palternum = form.get("palternum") or "";
-                pstate = form.get("pstate")
-                pdistrict = form.get("pdistrict");
-                pcity = form.get("pcity");
-                ppin = form.get("ppin")
-                pstreet = form.get("pstreet");
-                parea = form.get("parea");
-                pid = form.get("pid")
-                pidnum = form.get("pidnum");
-                corder = form.get("corder")
-            
-                cur.execute("SELECT email_id FROM parent WHERE email_id = %s", (pemail,))
-                if cur.fetchone():
-                    return '<script>alert("Email already registered! Please use a different email address.");window.location.href="/";</script>'
-                os.makedirs("image", exist_ok=True)
-                        
-                        
-                def save_file(field):
-                    if field in request.files:
-                        f = request.files[field]
-                        if f.filename != "":
-                            n = os.path.basename(f.filename)
-                            with open("image/" + n, "wb") as file:
-                                file.write(f.read())
-                            return n
-                    return ""
+    # ========== PARENT REGISTRATION ==========
+    pregister = form.get("pregister")
+    if pregister is not None:
+        try:
+            ptype = form.get("ptype");
+            pname = form.get("pname");
+            pgender = form.get("pgender")
+            pdob = form.get("pdob");
+            pmobile = form.get("pmobile");
+            pemail = form.get("pemail")
+            palternum = form.get("palternum") or "";
+            pstate = form.get("pstate")
+            pdistrict = form.get("pdistrict");
+            pcity = form.get("pcity");
+            ppin = form.get("ppin")
+            pstreet = form.get("pstreet");
+            parea = form.get("parea");
+            pid = form.get("pid")
+            pidnum = form.get("pidnum");
+            corder = form.get("corder")
+        
+            cur.execute("SELECT email_id FROM parent WHERE email_id = %s", (pemail,))
+            if cur.fetchone():
+                return '<script>alert("Email already registered! Please use a different email address.");window.location.href="/";</script>'
+            os.makedirs("image", exist_ok=True)
+                    
+                    
 
-            
-                pprofile_name = save_file('pprofile');
-                pidproof_name = save_file('pidproof')
-                        
-                cur.execute("""INSERT INTO parent (parent_type,parent_name,parent_gender,parent_dob,parent_mobile,
-                            email_id,parent_profile,alternate_mobile,state,district,city,pincode,street,area,id_type,
-                            id_number,id_proof,child_order) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                                    (ptype, pname, pgender, pdob, pmobile, pemail, pprofile_name, palternum, pstate, pdistrict,
-                                     pcity, ppin, pstreet, parea, pid, pidnum, pidproof_name, corder))
-                con.commit()
-                return '<script>alert("Parent Registered Successfully! \u2705");window.location.href="/";</script>'
-                        
-            except pymysql.IntegrityError as e:
-                con.rollback()
-                em = "Email already registered!" if "email_id" in str(
-                    e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
-                return f'<script>alert("{em}");window.location.href="/";</script>'
-            except Exception as e:
-                con.rollback()
-                return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'
+        except pymysql.IntegrityError as e:
+            con.rollback()
+            em = "Email already registered!" if "email_id" in str(
+                e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
+            return f'<script>alert("{em}");window.location.href="/";</script>'
+        except Exception as e:
+            con.rollback()
+            return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'
 
-        # ========== FORGOT PASSWORD ==========
-        forgot_password = form.get("forgot_password")
-        if forgot_password is not None:
-            forgot_email = form.get("forgot_email")
-            forgot_user = form.get("forgot_user_id")
-            forgot_role = form.get("forgot_role")
-            try:
-                if forgot_role == "hospital":
-                   cur.execute("SELECT password, hospital_name FROM hospital WHERE email_id=%s AND user_id=%s",
-                        (forgot_email, forgot_user))
-                   result = cur.fetchone()
-                   if result:
-                        pw, name = result
-                        return f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
-                   else:
-                        return '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="/";</script>'
-                elif forgot_role == "parent":
-                    cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
-                        (forgot_email, forgot_user))
-                    result = cur.fetchone()
-                    if result:
-                        pw, name = result
-                        return f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
-                    else:
-                        return '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="/";</script>'
-            except Exception as e:
-                return f'<script>alert("Error: {str(e)}");window.location.href="/";</script>'
-                    
-        # ========== LOGIN PROCESSING ==========
-        admin_submit = form.get("admin_login")
-        if admin_submit is not None:
-            userid = form.get("admin_user_id");
-            password = form.get("admin_password")
-            if userid and password:
-                cur.execute("SELECT id FROM admin WHERE user_id = %s AND password = %s", (userid, password))
-                r = cur.fetchone()
-                if r:
-                    return f'<script>alert("Admin login successful!");location.href="/admin_dashboard?admin_id={int(r[0])}";</script>'
+    # ========== FORGOT PASSWORD ==========
+    forgot_password = form.get("forgot_password")
+    if forgot_password is not None:
+        forgot_email = form.get("forgot_email")
+        forgot_user = form.get("forgot_user_id")
+        forgot_role = form.get("forgot_role")
+        try:
+            if forgot_role == "hospital":
+               cur.execute("SELECT password, hospital_name FROM hospital WHERE email_id=%s AND user_id=%s",
+                    (forgot_email, forgot_user))
+               result = cur.fetchone()
+               if result:
+                    pw, name = result
+                    return f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
+               else:
+                    return '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="/";</script>'
+            elif forgot_role == "parent":
+                cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
+                    (forgot_email, forgot_user))
+                result = cur.fetchone()
+                if result:
+                    pw, name = result
+                    return f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
                 else:
-                    return '<script>alert("Invalid Admin credentials!");</script>'
-                    
-        hospital_submit = form.get("hospital_login")
-        if hospital_submit is not None:
-            userid = form.get("hospital_user_id");
-            password = form.get("hospital_password")
-            if userid and password:
-                cur.execute("SELECT id FROM hospital WHERE user_id = %s AND password = %s", (userid, password))
-                r = cur.fetchone()
-                if r:
-                    return f'<script>alert("Hospital login successful!");location.href="/hospital_dashboard?hospital_id={int(r[0])}";</script>'
-                else:
-                    return '<script>alert("Invalid Hospital credentials!");</script>'
-                    
-        parent_submit = form.get("parent_login")
-        if parent_submit is not None:
-            userid = form.get("parent_user_id");
-            password = form.get("parent_password")
-            if userid and password:
-                cur.execute("SELECT id FROM parent WHERE user_id = %s AND password = %s", (userid, password))
-                r = cur.fetchone()
-                if r:
-                    return f'<script>alert("Parent login successful!");location.href="/parent_dashboard?parent_id={int(r[0])}";</script>'
-                else:
-                    return '<script>alert("Invalid Parent credentials!");</script>'
-                    
-                    
+                    return '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="/";</script>'
+        except Exception as e:
+            return f'<script>alert("Error: {str(e)}");window.location.href="/";</script>'
+                
+    # ========== LOGIN PROCESSING ==========
+    admin_submit = form.get("admin_login")
+    if admin_submit is not None:
+        userid = form.get("admin_user_id");
+        password = form.get("admin_password")
+        if userid and password:
+            cur.execute("SELECT id FROM admin WHERE user_id = %s AND password = %s", (userid, password))
+            r = cur.fetchone()
+            if r:
+                return f'<script>alert("Admin login successful!");location.href="/admin_dashboard?admin_id={int(r[0])}";</script>'
+            else:
+                return '<script>alert("Invalid Admin credentials!");</script>'
+                
+    hospital_submit = form.get("hospital_login")
+    if hospital_submit is not None:
+        userid = form.get("hospital_user_id");
+        password = form.get("hospital_password")
+        if userid and password:
+            cur.execute("SELECT id FROM hospital WHERE user_id = %s AND password = %s", (userid, password))
+            r = cur.fetchone()
+            if r:
+                return f'<script>alert("Hospital login successful!");location.href="/hospital_dashboard?hospital_id={int(r[0])}";</script>'
+            else:
+                return '<script>alert("Invalid Hospital credentials!");</script>'
+                
+    parent_submit = form.get("parent_login")
+    if parent_submit is not None:
+        userid = form.get("parent_user_id");
+        password = form.get("parent_password")
+        if userid and password:
+            cur.execute("SELECT id FROM parent WHERE user_id = %s AND password = %s", (userid, password))
+            r = cur.fetchone()
+            if r:
+                return f'<script>alert("Parent login successful!");location.href="/parent_dashboard?parent_id={int(r[0])}";</script>'
+            else:
+                return '<script>alert("Invalid Parent credentials!");</script>'
+                
+                
     # ========== DB COUNTERS ==========
     def get_count(q):
         try:
@@ -747,7 +726,7 @@ def home():
             </form>
     
             <!-- PARENT FORM -->
-            <form id="parentForm" name="prigister" method="post" enctype="multipart/form-data">
+            <form id="parentForm" name="pregister" method="post" enctype="multipart/form-data">
               <div class="row g-3">
                 <div class="col-12"><div class="form-section-title"><i class="fa-solid fa-users"></i> 1. Parent / Guardian Information</div></div>
                 <div class="col-md-6"><label class="form-label">Relationship to Child</label>
@@ -1111,140 +1090,803 @@ def help_page():
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Help & Support | Child Vaccination System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <style>
-  body{background:#f0f5fc;font-family:'Plus Jakarta Sans',sans-serif;color:#1a2b42;}
-  .topbar{background:#fff;border-bottom:1px solid #dde6f5;padding:16px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(15,108,189,0.07);}
-  .brand{font-family:'Nunito',sans-serif;font-weight:800;color:#0f6cbd;font-size:1.2rem;text-decoration:none;}
-  .hero{background:linear-gradient(135deg,#0f6cbd,#00c9a7);padding:64px 0 80px;color:white;text-align:center;}
-  .hero h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:2.4rem;margin-bottom:12px;}
-  .hero p{font-size:1.1rem;opacity:.88;}
-  .card-help{background:#fff;border-radius:18px;padding:32px 28px;border:1px solid #dde6f5;box-shadow:0 4px 24px rgba(15,108,189,0.08);transition:transform .25s,box-shadow .25s;}
-  .card-help:hover{transform:translateY(-6px);box-shadow:0 12px 36px rgba(15,108,189,0.14);}
-  .icon-box{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:18px;}
-  .faq-item{background:#fff;border-radius:14px;border:1px solid #dde6f5;margin-bottom:12px;overflow:hidden;}
-  .faq-q{padding:18px 22px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.97rem;}
-  .faq-q:hover{background:#f0f5fc;}
-  .faq-a{padding:0 22px 18px;color:#6b7a99;font-size:.93rem;line-height:1.7;display:none;}
-  .faq-a.open{display:block;}
-  .contact-box{background:linear-gradient(135deg,#0f6cbd,#1a8fe3);border-radius:18px;padding:40px 32px;color:white;text-align:center;}
-  .contact-box h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:1.6rem;margin-bottom:8px;}
-  .btn-back{background:#0f6cbd;color:white;border:none;border-radius:12px;padding:10px 24px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
-  .btn-back:hover{background:#0a4d8c;color:white;}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #f4f6f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  background: linear-gradient(135deg, #1e3a5f, #4585c6, #6fa8d8) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  padding: 13px 16px;
+}
+.navbar .container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+.navbar-brand {
+  font-weight: 700; color: white !important;
+  letter-spacing: 1.5px; text-transform: uppercase; font-size: 1rem;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.btn-back {
+  background: linear-gradient(135deg, #fff3, #ffffff22);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: white; padding: 7px 20px; border-radius: 25px;
+  font-weight: 600; font-size: 0.88rem; transition: all 0.3s;
+  text-decoration: none; white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-back:hover {
+  background: rgba(255,255,255,0.25); color: white;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 576px) {
+  .navbar { padding: 15px 14px; }
+  .navbar-brand { font-size: 0.82rem; letter-spacing: 0.5px; }
+  .btn-back { padding: 6px 14px; font-size: 0.82rem; }
+}
+@media (max-width: 400px) {
+  .navbar { padding: 9px 10px; }
+  .navbar-brand { font-size: 0.72rem; letter-spacing: 0.3px; }
+  .btn-back { padding: 5px 11px; font-size: 0.75rem; }
+}
+@media (max-width: 320px) {
+  .navbar-brand { font-size: 0.65rem; letter-spacing: 0; }
+  .btn-back { padding: 5px 9px; font-size: 0.7rem; }
+}
+
+/* ── HERO BANNER ── */
+.help-hero {
+  background: linear-gradient(135deg, #1e3a5f 0%, #4585c6 50%, #8cdec4 100%);
+  color: white; padding: 81px 0 60px;
+  position: relative; overflow: hidden; text-align: center;
+}
+.help-hero::before {
+  content: ''; position: absolute; top: -40%; right: -10%;
+  width: 500px; height: 500px; background: rgba(255,255,255,0.07);
+  border-radius: 50%; animation: float 8s ease-in-out infinite;
+}
+.help-hero::after {
+  content: ''; position: absolute; bottom: -30%; left: -10%;
+  width: 400px; height: 400px; background: rgba(255,255,255,0.06);
+  border-radius: 50%; animation: float 10s ease-in-out infinite reverse;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+.help-hero h1 { font-size: 2.4rem; font-weight: 800; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+.help-hero p { font-size: 1.1rem; opacity: 0.92; margin-top: 12px; }
+
+/* ── SEARCH BAR ── */
+.search-wrap {
+  margin-top: -28px; position: relative; z-index: 10;
+}
+.search-box {
+  background: white; border-radius: 50px; padding: 8px 8px 8px 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 10px; max-width: 600px; margin: 0 auto;
+}
+.search-box input {
+  border: none; outline: none; flex: 1; font-size: 1rem; color: #333;
+  background: transparent;
+}
+.search-box button {
+  background: linear-gradient(135deg, #4585c6, #6fa8d8);
+  border: none; color: white; border-radius: 40px;
+  padding: 10px 28px; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.3s; white-space: nowrap;
+}
+.search-box button:hover { opacity: 0.88; transform: scale(1.03); }
+
+/* ── CONTACT CARDS ── */
+.contact-card {
+  background: white; border-radius: 18px; padding: 28px 22px;
+  text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border-top: 4px solid; height: 100%; transition: transform 0.3s;
+}
+.contact-card:hover { transform: translateY(-5px); }
+.contact-card.blue  { border-color: #4585c6; }
+.contact-card.teal  { border-color: #0ea5e9; }
+.contact-card.green { border-color: #22c55e; }
+.contact-card.dark  { border-color: #1e3a5f; }
+.icon-circle {
+  width: 65px; height: 65px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px; font-size: 1.6rem;
+}
+.contact-card.blue  .icon-circle { background: #dbeafe; color: #4585c6; }
+.contact-card.teal  .icon-circle { background: #e0f2fe; color: #0ea5e9; }
+.contact-card.green .icon-circle { background: #dcfce7; color: #22c55e; }
+.contact-card.dark  .icon-circle { background: #e0e7ff; color: #1e3a5f; }
+.contact-card h5 { font-weight: 700; color: #1e3a5f; margin-bottom: 8px; }
+.contact-card p  { color: #6b7280; font-size: 0.87rem; margin-bottom: 15px; }
+.contact-card a {
+  display: inline-block; padding: 8px 22px; border-radius: 20px;
+  font-weight: 600; font-size: 0.85rem; text-decoration: none; color: white;
+}
+.contact-card.blue  a { background: linear-gradient(135deg, #4585c6, #6fa8d8); }
+.contact-card.teal  a { background: linear-gradient(135deg, #0ea5e9, #22d3ee); }
+.contact-card.green a { background: linear-gradient(135deg, #22c55e, #4ade80); }
+.contact-card.dark  a { background: linear-gradient(135deg, #1e3a5f, #4585c6); }
+.contact-card a:hover { opacity: 0.88; color: white; }
+
+/* ── SECTION CARD ── */
+.section-card {
+  background: white; border-radius: 18px; padding: 28px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 28px;
+}
+.section-card h5 {
+  font-weight: 700; color: #1e3a5f; margin-bottom: 22px;
+  display: flex; align-items: center; gap: 10px; font-size: 1.1rem;
+  border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;
+}
+.section-card h5 i { color: #4585c6; font-size: 1.2rem; }
+
+/* ── QUICK GUIDE ── */
+.guide-card {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-radius: 14px; padding: 20px;
+  height: 100%; border-left: 4px solid #4585c6;
+  transition: transform 0.3s;
+}
+.guide-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(69,133,198,0.15); }
+.step-num {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #1e3a5f, #4585c6); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.9rem; margin-bottom: 12px;
+}
+.guide-card h6 { font-weight: 700; color: #1e3a5f; margin-bottom: 8px; }
+.guide-card p  { color: #555; font-size: 0.87rem; margin: 0; }
+
+/* ── ROLE TABS ── */
+.role-tab {
+  padding: 9px 22px; border-radius: 25px; border: 2px solid #4585c6;
+  color: #4585c6; font-weight: 600; cursor: pointer; font-size: 0.88rem;
+  transition: all 0.3s; background: white; margin: 4px;
+}
+.role-tab.active, .role-tab:hover {
+  background: linear-gradient(135deg, #4585c6, #6fa8d8);
+  color: white; border-color: transparent;
+}
+
+/* ── FAQ ── */
+.accordion-button { font-weight: 600; color: #1e3a5f; background: #eff6ff; }
+.accordion-button:not(.collapsed) { background: #dbeafe; color: #1e40af; box-shadow: none; }
+.accordion-button:focus { box-shadow: none; }
+.accordion-body { color: #555; line-height: 1.75; font-size: 0.93rem; }
+.accordion-item {
+  border: 1px solid #bfdbfe; border-radius: 10px !important;
+  margin-bottom: 8px; overflow: hidden;
+}
+
+/* ── TICKET FORM ── */
+.form-label  { font-weight: 600; color: #1e3a5f; font-size: 0.9rem; }
+.form-control, .form-select {
+  border: 2px solid #bfdbfe; border-radius: 10px;
+  padding: 10px 14px; font-size: 0.9rem;
+}
+.form-control:focus, .form-select:focus {
+  border-color: #4585c6; box-shadow: 0 0 0 3px rgba(69,133,198,0.15);
+}
+.btn-submit {
+  background: linear-gradient(135deg, #1e3a5f, #4585c6); color: white;
+  border: none; padding: 12px 40px; border-radius: 25px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 4px 15px rgba(69,133,198,0.4);
+  transition: all 0.3s; font-size: 0.95rem;
+}
+.btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── INFO BOX ── */
+.info-box {
+  background: #eff6ff; border-radius: 12px; padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.info-box i { font-size: 1.5rem; flex-shrink: 0; }
+
+/* ── TOAST ── */
+#toastContainer {
+  position: fixed; top: 80px; right: 20px; z-index: 9999; width: 340px;
+}
+.custom-toast {
+  padding: 14px 18px; border-radius: 12px; margin-bottom: 10px;
+  display: flex; align-items: flex-start; gap: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15); animation: slideIn 0.4s ease;
+  font-size: 0.9rem; line-height: 1.4;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.toast-success { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
+.toast-error   { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+.custom-toast i { font-size: 1.1rem; margin-top: 1px; flex-shrink: 0; }
+
+/* ── FAQ TAB CONTENT ── */
+.faq-pane { display: none; }
+.faq-pane.active { display: block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .help-hero { padding: 55px 15px 50px; }
+  .help-hero h1 { font-size: 1.7rem; }
+  .help-hero p  { font-size: 0.92rem; }
+  .help-hero .fa-headset { font-size: 2.6rem !important; }
+  .search-wrap { margin-top: -22px; }
+  .search-box  { margin: 0 12px; padding: 7px 7px 7px 18px; }
+  .search-box input { font-size: 0.9rem; }
+  .search-box button { padding: 8px 16px; font-size: 0.82rem; }
+  .section-card { padding: 18px; }
+  .btn-submit   { width: 100%; }
+  .role-tab { padding: 7px 14px; font-size: 0.82rem; margin: 3px; }
+}
+@media (max-width: 480px) {
+  .help-hero { padding: 50px 12px 45px; }
+  .help-hero h1 { font-size: 1.45rem; }
+  .help-hero p  { font-size: 0.87rem; }
+  .search-box { flex-wrap: nowrap; }
+  .search-box button { padding: 8px 12px; font-size: 0.78rem; }
+  .section-card h5 { font-size: 1rem; }
+  .guide-card { padding: 16px; }
+  .role-tab { padding: 6px 10px; font-size: 0.78rem; margin: 2px; }
+}
+
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="container d-flex justify-content-between align-items-center">
-    <a class="brand" href="/"><i class="fa-solid fa-syringe me-2"></i>Child Vaccination System</a>
-    <a class="btn-back" href="/"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
-  </div>
-</div>
 
-<div class="hero">
-  <div class="container">
-    <h1><i class="fa-solid fa-handshake-angle me-3"></i>Help &amp; Support</h1>
-    <p>Find answers, contact us, or explore common questions below.</p>
-  </div>
-</div>
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
 
-<div class="container py-5">
-
-  <!-- Contact Cards -->
-  <div class="row g-4 mb-5">
-    <div class="col-md-4">
-      <div class="card-help text-center">
-        <div class="icon-box mx-auto" style="background:#e8f4ff;color:#0f6cbd;"><i class="fa-solid fa-envelope"></i></div>
-        <h5 style="font-family:'Nunito',sans-serif;font-weight:800;">Email Support</h5>
-        <p class="text-muted small mb-3">Send us your queries anytime. We respond within 24 hours.</p>
-        <a href="mailto:support@cvs.com" class="btn btn-sm" style="background:#e8f4ff;color:#0f6cbd;border-radius:10px;font-weight:700;">support@cvs.com</a>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card-help text-center">
-        <div class="icon-box mx-auto" style="background:#e6fdf8;color:#00b37e;"><i class="fa-solid fa-phone"></i></div>
-        <h5 style="font-family:'Nunito',sans-serif;font-weight:800;">Phone Support</h5>
-        <p class="text-muted small mb-3">Mon – Sat, 9:00 AM – 6:00 PM IST</p>
-        <a href="tel:+911800000000" class="btn btn-sm" style="background:#e6fdf8;color:#00b37e;border-radius:10px;font-weight:700;">1800-000-0000 (Toll Free)</a>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card-help text-center">
-        <div class="icon-box mx-auto" style="background:#fff0f0;color:#ff6b6b;"><i class="fa-solid fa-circle-question"></i></div>
-        <h5 style="font-family:'Nunito',sans-serif;font-weight:800;">Quick Help</h5>
-        <p class="text-muted small mb-3">Browse our FAQ section below for instant answers.</p>
-        <a href="#faq" class="btn btn-sm" style="background:#fff0f0;color:#ff6b6b;border-radius:10px;font-weight:700;">View FAQs</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- FAQ -->
-  <h3 id="faq" style="font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:24px;">
-    <i class="fa-solid fa-circle-question me-2" style="color:#0f6cbd;"></i>Frequently Asked Questions
-  </h3>
-
-  <div class="faq-item">
-    <div class="faq-q" onclick="toggleFaq(this)">How do I register my hospital? <i class="fa-solid fa-chevron-down"></i></div>
-    <div class="faq-a">Click the <strong>Register</strong> button on the home page, select <strong>Hospital</strong>, and fill in your hospital details including license, owner information, and upload required documents. After submission, admin will review and activate your account.</div>
-  </div>
-  <div class="faq-item">
-    <div class="faq-q" onclick="toggleFaq(this)">How do I register as a parent? <i class="fa-solid fa-chevron-down"></i></div>
-    <div class="faq-a">Click <strong>Register</strong> on the home page, select <strong>Parent</strong>, and fill in your personal details and ID proof. Once registered, you can log in and manage your child's vaccination records.</div>
-  </div>
-  <div class="faq-item">
-    <div class="faq-q" onclick="toggleFaq(this)">I forgot my User ID or Password. What should I do? <i class="fa-solid fa-chevron-down"></i></div>
-    <div class="faq-a">On the login modal, click <strong>Forgot User ID / Password</strong>. Enter your registered email and User ID to retrieve your credentials.</div>
-  </div>
-  <div class="faq-item">
-    <div class="faq-q" onclick="toggleFaq(this)">How do I book a vaccination appointment? <i class="fa-solid fa-chevron-down"></i></div>
-    <div class="faq-a">Log in as a Parent, go to your dashboard, add your child's details, and then book an appointment at a nearby registered hospital.</div>
-  </div>
-  <div class="faq-item">
-    <div class="faq-q" onclick="toggleFaq(this)">Is my data secure on this platform? <i class="fa-solid fa-chevron-down"></i></div>
-    <div class="faq-a">Yes. All data is stored in a secure MySQL database hosted on Render. Passwords and sensitive information are protected. We do not share your data with any third parties.</div>
-  </div>
-  <div class="faq-item">
-    <div class="faq-q" onclick="toggleFaq(this)">How do I contact the admin? <i class="fa-solid fa-chevron-down"></i></div>
-    <div class="faq-a">Use the Email Support option above or call our toll-free number. Admins can also be reached through the in-system messaging feature available after login.</div>
-  </div>
-
-  <!-- Contact Banner -->
-  <div class="contact-box mt-5">
-    <h3><i class="fa-solid fa-headset me-2"></i>Still need help?</h3>
-    <p style="opacity:.88;margin-bottom:24px;">Our support team is ready to assist you with any issue.</p>
-    <a href="mailto:support@cvs.com" class="btn btn-light fw-bold me-3" style="border-radius:12px;color:#0f6cbd;">
-      <i class="fa-solid fa-envelope me-2"></i>Email Us
-    </a>
-    <a href="/" class="btn fw-bold" style="border-radius:12px;background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.5);">
-      <i class="fa-solid fa-house me-2"></i>Back to Home
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container-fluid d-flex align-items-center justify-content-between">
+    <span class="navbar-brand">
+       Child Vaccination System
+    </span>
+    <a href="Home_main.html" class="btn-back">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Home
     </a>
   </div>
+</nav>
 
+<!-- HERO BANNER -->
+<section class="help-hero" style="margin-top:62px;">
+  <div class="container position-relative" style="z-index:2;">
+    <div class="mb-3">
+      <i class="fa-solid fa-headset" style="font-size:3.5rem; opacity:0.92;"></i>
+    </div>
+    <h1>How Can We Help You?</h1>
+    <p>Browse FAQs, quick guides, or submit a support ticket — we're here to help.</p>
+  </div>
+</section>
+
+<!-- SEARCH BAR -->
+<div class="container search-wrap mb-5">
+  <div class="search-box">
+    <i class="fa-solid fa-magnifying-glass text-secondary"></i>
+    <input type="text" id="searchInput" placeholder="Search FAQs, topics, or keywords..." oninput="searchFAQ(this.value)">
+    <button onclick="searchFAQ(document.getElementById('searchInput').value)">
+      <i class="fa-solid fa-search me-1"></i> Search
+    </button>
+  </div>
+  <div id="searchResults" class="mt-3" style="max-width:600px;margin:12px auto 0;display:none;">
+    <div class="section-card p-3" id="searchResultsContent"></div>
+  </div>
 </div>
 
-<footer style="background:#1a2b42;color:rgba(255,255,255,0.6);text-align:center;padding:24px;margin-top:60px;font-size:.88rem;">
-  &copy; 2026 Child Vaccination Management System. All rights reserved.
+<!-- CONTACT CARDS -->
+<section class="container mb-5">
+  <div class="row g-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="contact-card blue">
+        <div class="icon-circle"><i class="fas fa-envelope"></i></div>
+        <h5>Email Us</h5>
+        <p>Send your query and get a response within 24 business hours.</p>
+        <a href="mailto:childvaccinationsystem2026@gmail.com">
+          <i class="fas fa-paper-plane me-1"></i> Send Email
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="contact-card teal">
+        <div class="icon-circle"><i class="fas fa-phone-alt"></i></div>
+        <h5>Call Support</h5>
+        <p>Mon–Sat, 9:00 AM – 6:00 PM IST. Immediate assistance available.</p>
+        <a href="tel:+919345790381">
+          <i class="fas fa-phone me-1"></i> +91 93457 90381
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="contact-card green">
+        <div class="icon-circle"><i class="fas fa-ticket-alt"></i></div>
+        <h5>Submit Ticket</h5>
+        <p>Raise a support ticket and track it. We respond within 24 hours.</p>
+        <a href="#ticketSection" onclick="scrollToTicket()">
+          <i class="fas fa-arrow-down me-1"></i> Raise Ticket
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="contact-card dark">
+        <div class="icon-circle"><i class="fas fa-map-marker-alt"></i></div>
+        <h5>Head Office</h5>
+        <p>Health Department, Government of India, New Delhi - 110001.</p>
+        <a href="#">
+          <i class="fas fa-directions me-1"></i> Get Directions
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK START GUIDES -->
+<section class="container mb-5">
+  <div class="section-card">
+    <h5><i class="fas fa-rocket"></i> Quick Start Guides</h5>
+    <div class="row g-3">
+      <div class="col-lg-3 col-md-6">
+        <div class="guide-card">
+          <div class="step-num">1</div>
+          <h6>Register as Hospital</h6>
+          <p>Click Login → Hospital → Register as Hospital. Fill all sections and upload required documents. Admin will review and approve your application.</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="guide-card">
+          <div class="step-num">2</div>
+          <h6>Register as Parent</h6>
+          <p>Click Login → Parent → Register as Parent. Provide your details, child information, and ID proof. You'll receive login credentials after approval.</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="guide-card">
+          <div class="step-num">3</div>
+          <h6>Book a Vaccination</h6>
+          <p>Log in as Parent, go to View Hospital, select a hospital and fill the appointment form with your child's details and preferred date.</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="guide-card">
+          <div class="step-num">4</div>
+          <h6>Track Vaccination</h6>
+          <p>After login, visit Vaccination Info to view your child's completed and upcoming vaccines, schedule reminders, and download records.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQs -->
+<section class="container mb-5">
+  <div class="section-card">
+    <h5><i class="fas fa-circle-question"></i> Frequently Asked Questions</h5>
+
+    <!-- Role Tabs -->
+    <div class="mb-4 text-center">
+      <button class="role-tab active" onclick="showFAQ('general', this)">
+        <i class="fas fa-globe me-1"></i> General
+      </button>
+      <button class="role-tab" onclick="showFAQ('parent', this)">
+        <i class="fas fa-users me-1"></i> Parents
+      </button>
+      <button class="role-tab" onclick="showFAQ('hospital', this)">
+        <i class="fas fa-hospital me-1"></i> Hospitals
+      </button>
+    </div>
+
+    <!-- General FAQ -->
+    <div class="faq-pane active" id="faq-general">
+      <div class="accordion" id="genFAQ">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#g1">
+              <i class="fas fa-info-circle me-2 text-primary"></i> What is the Child Vaccination System?
+            </button>
+          </h2>
+          <div id="g1" class="accordion-collapse collapse show" data-bs-parent="#genFAQ">
+            <div class="accordion-body">
+              The Child Vaccination System (CVS) is a digital healthcare platform that helps parents track vaccination records, book appointments at registered hospitals, and receive timely reminders for upcoming vaccines. Hospitals can manage vaccination schedules and records, while admins oversee the entire system.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g2">
+              <i class="fas fa-user-plus me-2 text-success"></i> Who can register on this platform?
+            </button>
+          </h2>
+          <div id="g2" class="accordion-collapse collapse" data-bs-parent="#genFAQ">
+            <div class="accordion-body">
+              Any <strong>parent or guardian</strong> with children requiring vaccination can register. <strong>Hospitals and clinics</strong> providing vaccination services can also register. All registrations are reviewed and approved by the system administrator before access is granted.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">
+              <i class="fas fa-lock me-2 text-warning"></i> Is my data safe and secure?
+            </button>
+          </h2>
+          <div id="g3" class="accordion-collapse collapse" data-bs-parent="#genFAQ">
+            <div class="accordion-body">
+              Yes. All personal information and health records are stored securely in our database. Your data is never shared with third parties. We follow strict data protection guidelines to ensure your privacy.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g4">
+              <i class="fas fa-key me-2 text-danger"></i> I forgot my User ID or Password. What do I do?
+            </button>
+          </h2>
+          <div id="g4" class="accordion-collapse collapse" data-bs-parent="#genFAQ">
+            <div class="accordion-body">
+              On the Login screen, click <strong>"Forgot User ID / Password?"</strong>. Enter your registered User ID and email address — your credentials will be displayed. If you still face issues, contact our support team at <strong>childvaccinationsystem2026@gmail.com</strong>.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g5">
+              <i class="fas fa-mobile-alt me-2 text-info"></i> Can I use this system on my mobile?
+            </button>
+          </h2>
+          <div id="g5" class="accordion-collapse collapse" data-bs-parent="#genFAQ">
+            <div class="accordion-body">
+              Yes! The Child Vaccination System is fully responsive and works on smartphones, tablets, and desktops. You can access it through any modern web browser without needing to install an app.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parent FAQ -->
+    <div class="faq-pane" id="faq-parent">
+      <div class="accordion" id="parFAQ">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#p1">
+              <i class="fas fa-baby me-2 text-success"></i> How do I add my child to the system?
+            </button>
+          </h2>
+          <div id="p1" class="accordion-collapse collapse show" data-bs-parent="#parFAQ">
+            <div class="accordion-body">
+              After logging in, go to <strong>Manage Child</strong> from the sidebar. Click <strong>Add Child</strong> and fill in your child's name, date of birth, gender, and vaccination details. You can manage multiple children from this section.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#p2">
+              <i class="fas fa-calendar-plus me-2 text-primary"></i> How do I book a vaccination appointment?
+            </button>
+          </h2>
+          <div id="p2" class="accordion-collapse collapse" data-bs-parent="#parFAQ">
+            <div class="accordion-body">
+              Log in → Go to <strong>View Hospital</strong> → Find a hospital near you → Click <strong>Book Appointment</strong> → Fill in child details, select vaccine and preferred date → Submit. Your request will be reviewed and confirmed by the hospital.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#p3">
+              <i class="fas fa-syringe me-2 text-warning"></i> How do I view my child's vaccination history?
+            </button>
+          </h2>
+          <div id="p3" class="accordion-collapse collapse" data-bs-parent="#parFAQ">
+            <div class="accordion-body">
+              Go to <strong>Vaccination Info</strong> in the sidebar. You will see a complete list of vaccines administered, dates, and the hospital where each vaccine was given. Upcoming vaccines are also shown with their schedules.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#p4">
+              <i class="fas fa-bell me-2 text-danger"></i> How do vaccination reminders work?
+            </button>
+          </h2>
+          <div id="p4" class="accordion-collapse collapse" data-bs-parent="#parFAQ">
+            <div class="accordion-body">
+              The system automatically generates reminders for upcoming vaccinations based on your child's age and vaccination schedule. Visit <strong>My Reminders</strong> to view all upcoming alerts and ensure your contact details are updated in <strong>My Profile</strong>.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#p5">
+              <i class="fas fa-times-circle me-2 text-secondary"></i> Can I cancel or reschedule an appointment?
+            </button>
+          </h2>
+          <div id="p5" class="accordion-collapse collapse" data-bs-parent="#parFAQ">
+            <div class="accordion-body">
+              Go to <strong>My Appointments</strong> in the sidebar to view all bookings. Contact the hospital directly using the contact details listed on their profile, or submit a support ticket requesting reschedule assistance.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hospital FAQ -->
+    <div class="faq-pane" id="faq-hospital">
+      <div class="accordion" id="hospFAQ">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#h1">
+              <i class="fas fa-hospital-alt me-2 text-primary"></i> How do I register my hospital?
+            </button>
+          </h2>
+          <div id="h1" class="accordion-collapse collapse show" data-bs-parent="#hospFAQ">
+            <div class="accordion-body">
+              On the homepage, click <strong>Login → Hospital → Register as Hospital</strong>. Complete all 7 sections including hospital info, contact details, facilities, operating hours, owner identity, and ownership proof. Upload required documents and submit. The admin will review and approve within 2–3 business days.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#h2">
+              <i class="fas fa-clipboard-check me-2 text-success"></i> How do I approve parent appointment requests?
+            </button>
+          </h2>
+          <div id="h2" class="accordion-collapse collapse" data-bs-parent="#hospFAQ">
+            <div class="accordion-body">
+              Go to <strong>Parent Application</strong> in the sidebar. Review pending requests, click <strong>View</strong> to see child details, then <strong>Approve</strong> or <strong>Reject</strong>. Approved requests automatically create an appointment entry and notify the parent.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#h3">
+              <i class="fas fa-syringe me-2 text-warning"></i> How do I update vaccination records?
+            </button>
+          </h2>
+          <div id="h3" class="accordion-collapse collapse" data-bs-parent="#hospFAQ">
+            <div class="accordion-body">
+              Go to <strong>Vaccination Info</strong> in the sidebar. Find the child's appointment and click <strong>Update</strong>. Enter the vaccine name, batch number, and administration date, then save. The parent's dashboard will reflect the update immediately.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#h4">
+              <i class="fas fa-edit me-2 text-info"></i> How do I update my hospital profile?
+            </button>
+          </h2>
+          <div id="h4" class="accordion-collapse collapse" data-bs-parent="#hospFAQ">
+            <div class="accordion-body">
+              Go to <strong>My Profile</strong> from the sidebar and click <strong>Edit</strong> to update your hospital's name, address, contact number, email, or service availability. Save the changes to apply them.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#h5">
+              <i class="fas fa-comments me-2 text-secondary"></i> How do I communicate with parents?
+            </button>
+          </h2>
+          <div id="h5" class="accordion-collapse collapse" data-bs-parent="#hospFAQ">
+            <div class="accordion-body">
+              Use the <strong>Chats</strong> section in the sidebar to send and receive messages from parents. You can discuss appointment details, vaccination queries, and health updates directly through the platform.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /section-card FAQs -->
+</section>
+
+<!-- SUPPORT TICKET FORM -->
+<section class="container mb-5" id="ticketSection">
+  <div class="section-card">
+    <h5><i class="fas fa-headset"></i> Submit a Support Ticket</h5>
+    <p class="text-muted mb-4" style="font-size:0.9rem;">
+      Can't find what you need? Fill the form below and our team will respond within 24 business hours.
+    </p>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label"><i class="fas fa-user me-1 text-primary"></i> Your Full Name</label>
+        <input type="text" class="form-control" id="fullName" placeholder="Enter your full name" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label"><i class="fas fa-envelope me-1 text-primary"></i> Contact Email</label>
+        <input type="email" class="form-control" id="contactEmail" placeholder="your@email.com" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label"><i class="fas fa-id-badge me-1 text-primary"></i> Your Role</label>
+        <select class="form-select" id="userRole">
+          <option value="">-- Select Role --</option>
+          <option>Parent / Guardian</option>
+          <option>Hospital Staff</option>
+          <option>General Visitor</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label"><i class="fas fa-tag me-1 text-primary"></i> Issue Category</label>
+        <select class="form-select" id="issueCategory">
+          <option value="">-- Select Category --</option>
+          <option>Registration / Account</option>
+          <option>Login / Access Issues</option>
+          <option>Appointment Booking</option>
+          <option>Vaccination Records</option>
+          <option>Hospital Information</option>
+          <option>Reminders & Notifications</option>
+          <option>Technical Bug</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label"><i class="fas fa-flag me-1 text-primary"></i> Priority</label>
+        <select class="form-select" id="priority">
+          <option>Low – General Question</option>
+          <option>Medium – Need Help Soon</option>
+          <option>High – Urgent Issue</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label"><i class="fas fa-align-left me-1 text-primary"></i> Describe Your Issue</label>
+        <textarea class="form-control" id="issueDescription" rows="5"
+          placeholder="Please describe your issue in detail so we can assist you faster..."></textarea>
+      </div>
+      <div class="col-12">
+        <button class="btn-submit" id="submitBtn" onclick="submitTicket()">
+          <i class="fas fa-paper-plane me-2"></i> Submit Ticket
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM INFO -->
+<section class="container mb-5">
+  <div class="section-card">
+    <h5><i class="fas fa-circle-info"></i> System Information</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="info-box">
+          <i class="fas fa-clock text-primary"></i>
+          <div>
+            <div class="fw-bold text-dark" style="font-size:0.9rem;">Support Hours</div>
+            <div class="text-muted" style="font-size:0.83rem;">Mon–Sat: 9:00 AM – 6:00 PM IST</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <i class="fas fa-reply text-success"></i>
+          <div>
+            <div class="fw-bold text-dark" style="font-size:0.9rem;">Response Time</div>
+            <div class="text-muted" style="font-size:0.83rem;">Email: 24 hrs &nbsp;|&nbsp; Phone: Immediate</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <i class="fas fa-shield-heart text-danger"></i>
+          <div>
+            <div class="fw-bold text-dark" style="font-size:0.9rem;">Your Data is Safe</div>
+            <div class="text-muted" style="font-size:0.83rem;">All records are encrypted &amp; secure</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:#222;color:#cbd5e1;padding:35px 0 18px;text-align:center;margin-top:20px;">
+  <p style="margin:0;font-size:0.9rem;">
+    <i class="fas fa-hands-holding-child me-2" style="color:#4585c6;"></i>
+    Child Vaccination Management System
+  </p>
+  <p style="margin:6px 0 0;font-size:0.8rem;color:#64748b;">
+    &copy; 2026 CVS. All rights reserved.
+    &nbsp;|&nbsp; <a href="mailto:childvaccinationsystem2026@gmail.com" style="color:#4585c6;text-decoration:none;">childvaccinationsystem2026@gmail.com</a>
+    &nbsp;|&nbsp; +91 93457 90381
+  </p>
 </footer>
 
+<!-- JAVASCRIPT -->
 <script>
-function toggleFaq(el) {
-  const ans = el.nextElementSibling;
-  const icon = el.querySelector('i');
-  const isOpen = ans.classList.contains('open');
-  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
-  document.querySelectorAll('.faq-q i').forEach(i => i.style.transform = '');
-  if (!isOpen) {
-    ans.classList.add('open');
-    icon.style.transform = 'rotate(180deg)';
-  }
+
+function submitTicket() {
+  const fullName = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const role = document.getElementById('userRole').value;
+  const category = document.getElementById('issueCategory').value;
+  const priority = document.getElementById('priority').value;
+  const description = document.getElementById('issueDescription').value.trim();
+
+  if (!fullName) { alert('Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  if (!role) { alert('Please select your role.'); return; }
+  if (!category) { alert('Please select an issue category.'); return; }
+  if (!description) { alert('Please describe your issue.'); return; }
+
+  const form = new FormData();
+  form.append('fullName', fullName);
+  form.append('contactEmail', email);
+  form.append('userRole', role);
+  form.append('issueCategory', category);
+  form.append('priority', priority);
+  form.append('issueDescription', description);
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+
+  fetch('/submit_ticket', { method: 'POST', body: form })
+    .then(r => r.text())
+    .then(html => { document.open(); document.write(html); document.close(); })
+    .catch(() => {
+      alert('Submission failed. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Submit Ticket';
+    });
 }
 </script>
+
 </body>
 </html>"""
+
+
+@app.route("/submit_ticket", methods=["POST"])
+def submit_ticket():
+    try:
+        full_name = request.form.get("fullName", "").strip()
+        email = request.form.get("contactEmail", "").strip()
+        role = request.form.get("userRole", "")
+        category = request.form.get("issueCategory", "")
+        priority = request.form.get("priority", "")
+        description = request.form.get("issueDescription", "").strip()
+
+        if not full_name or not email or not role or not category or not description:
+            return "<script>alert('Please fill all required fields.');window.history.back();</script>"
+
+        if con:
+            cur.execute(
+                """INSERT INTO support_tickets (full_name, email, role, category, priority, description)
+                   VALUES (%s, %s, %s, %s, %s, %s)""",
+                (full_name, email, role, category, priority, description)
+            )
+            con.commit()
+
+        return "<script>alert('\u2705 Support ticket submitted successfully! We will respond within 24 hours.');window.location.href='/help';</script>"
+    except Exception as e:
+        if con:
+            con.rollback()
+        return f"<script>alert('Ticket submission failed: {str(e)}');window.history.back();</script>"
 
 
 @app.errorhandler(404)
