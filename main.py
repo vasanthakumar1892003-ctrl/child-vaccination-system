@@ -2638,7 +2638,7 @@ body {
   // ── LOGOUT ─────────────────────────────────────────────────────────────────
   function logout() {
     if (confirm("Are you sure you want to logout?")) {
-      window.location.href = "Home_main.html";
+      window.location.href = "/";
     }
   }
 
