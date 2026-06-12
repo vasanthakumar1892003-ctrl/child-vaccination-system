@@ -1372,7 +1372,7 @@ body {
     <span class="navbar-brand">
        Child Vaccination System
     </span>
-    <a href="Home_main.html" class="btn-back">
+    <a href="main.py" class="btn-back">
       <i class="fa-solid fa-arrow-left me-1"></i> Back to Home
     </a>
   </div>
@@ -1906,7 +1906,7 @@ def not_found(e):
   <h1 style="font-size:4rem;font-weight:900;color:#0f6cbd;margin-bottom:8px;">404</h1>
   <h2 style="font-weight:700;color:#1a2b42;margin-bottom:12px;">Page Not Found</h2>
   <p style="color:#6b7a99;margin-bottom:32px;">The page you are looking for doesn't exist or has been moved.</p>
-  <a href="/" style="background:#0f6cbd;color:white;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:700;">
+  <a href="main.py" style="background:#0f6cbd;color:white;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:700;">
     <i class="fa-solid fa-house me-2"></i>Back to Home
   </a>
 </div>
