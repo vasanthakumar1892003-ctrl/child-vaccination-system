@@ -84,82 +84,77 @@ def home():
             pid = form.get("pid")
             pidnum = form.get("pidnum");
             corder = form.get("corder")
-        
-           
-                    
-                    
-
         except Exception as e:
-          con.rollback()
-          em = "Email already registered!" if "email_id" in str(
-            e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
-          return f'<script>alert("{em}");window.location.href="/";</script>'
-    
-        # ========== ADMIN LOGIN ==========
-        admin_submit = form.get("admin_login")
+            con.rollback()
+            em = "Email already registered!" if "email_id" in str(
+                e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
+            return f'<script>alert("{em}");window.location.href="/";</script>'
 
-        if admin_submit is not None:
-            userid = form.get("admin_user_id")
-            password = form.get("admin_password")
+    # ========== ADMIN LOGIN ==========
+    admin_submit = form.get("admin_login")
 
-            if userid == "admin" and password == "admin123":
-                return '''
-                <script>
-                alert("Admin Login Successful");
-                location.href="/admin_dashboard";
-                </script>
-                '''
-            else:
-                return '''
-                <script>
-                alert("Invalid Admin Login");
-                location.href="/";
-                </script>
-                '''
+    if admin_submit is not None:
+        userid = form.get("admin_user_id")
+        password = form.get("admin_password")
 
-        # ========== HOSPITAL LOGIN ==========
-        hospital_submit = form.get("hospital_login")
+        if userid == "admin" and password == "admin123":
+            return '''
+            <script>
+            alert("Admin Login Successful");
+            location.href="/admin_dashboard";
+            </script>
+            '''
+        else:
+            return '''
+            <script>
+            alert("Invalid Admin Login");
+            location.href="/";
+            </script>
+            '''
 
-        if hospital_submit is not None:
-            userid = form.get("hospital_user_id")
-            password = form.get("hospital_password")
+    # ========== HOSPITAL LOGIN ==========
+    hospital_submit = form.get("hospital_login")
 
-            if userid == "hospital" and password == "hospital123":
-                return '''
-                <script>
-                alert("Hospital Login Successful");
-                location.href="/hospital_dashboard";
-                </script>
-                '''
-            else:
-                return '''
-                <script>
-                alert("Invalid Hospital Login");
-                location.href="/";
-                </script>
-                '''
+    if hospital_submit is not None:
+        userid = form.get("hospital_user_id")
+        password = form.get("hospital_password")
 
-        # ========== PARENT LOGIN ==========
-        parent_submit = form.get("parent_login")
+        if userid == "hospital" and password == "hospital123":
+            return '''
+            <script>
+            alert("Hospital Login Successful");
+            location.href="/hospital_dashboard";
+            </script>
+            '''
+        else:
+            return '''
+            <script>
+            alert("Invalid Hospital Login");
+            location.href="/";
+            </script>
+            '''
 
-        if parent_submit is not None:
-            userid = form.get("parent_user_id")
-            password = form.get("parent_password")
+    # ========== PARENT LOGIN ==========
+    parent_submit = form.get("parent_login")
 
-            if userid == "parent" and password == "parent123":
-                return '''
-                <script>
-                alert("Parent Login Successful");
-                location.href="/parent_dashboard";
-                </script>
-                '''
-            else:
-                return '''
-                <script>
-                alert("Invalid Parent Login");
-                location.href="/";
-                </script>
-                '''            
+    if parent_submit is not None:
+        userid = form.get("parent_user_id")
+        password = form.get("parent_password")
+
+        if userid == "parent" and password == "parent123":
+            return '''
+            <script>
+            alert("Parent Login Successful");
+            location.href="/parent_dashboard";
+            </script>
+            '''
+        else:
+            return '''
+            <script>
+            alert("Invalid Parent Login");
+            location.href="/";
+            </script>
+            '''            
     
     # ========== HTML ==========
     cnt_children = 0
