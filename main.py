@@ -1372,7 +1372,7 @@ body {
     <span class="navbar-brand">
        Child Vaccination System
     </span>
-    <a href="Home_main.html" class="btn-back">
+    <a href="/" class="btn-back">
       <i class="fa-solid fa-arrow-left me-1"></i> Back to Home
     </a>
   </div>
