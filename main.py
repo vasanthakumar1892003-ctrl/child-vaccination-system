@@ -1,29 +1,31 @@
-import pymysql
 import os
 from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
 
-db_error = None
-try:
-    con = pymysql.connect(
-    host=os.environ.get("MYSQLHOST"),
-    user=os.environ.get("MYSQLUSER"),
-    password=os.environ.get("MYSQLPASSWORD"),
-    database=os.environ.get("MYSQLDATABASE"),
-    port=int(os.environ.get("MYSQLPORT"))
-)
-    cur = con.cursor()
-except Exception as e:
-    con = None
-    cur = None
-    db_error = str(e)
+# --- Dummy DB stub (no database required) ---
+class DummyCursor:
+  def execute(self, *args, **kwargs):
+    return None
+  def fetchone(self):
+    return None
+  def fetchall(self):
+    return []
+
+class DummyConnection:
+  def commit(self):
+    pass
+  def rollback(self):
+    pass
+
+# default no-op DB objects to keep existing code paths safe
+con = DummyConnection()
+cur = DummyCursor()
+
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    if db_error:
-        return f"<h2 style='color:red;'>Database Connection Failed!</h2><pre>{db_error}</pre>", 500
     form = request.form
 
     # ========== HOSPITAL REGISTRATION ==========
@@ -58,51 +60,9 @@ def home():
             oid = form.get("oid");
             oidnum = form.get("oidnum")
             otype = form.get("otype")
-        
-            cur.execute("SELECT email_id FROM hospital WHERE email_id = %s", (hemail,))
-            if cur.fetchone():
-                return '<script>alert("Email already registered! Please use a different email address.");window.location.href="/";</script>'
-            os.makedirs("image", exist_ok=True)
-            
-            
-            def save_file(field):
-                if field in request.files:
-                    f = request.files[field]
-                       
-                    if f.filename != "":
-                        n = os.path.basename(f.filename)
-                        with open("image/" + n, "wb") as file:
-                            file.write(f.read())
-                        return n
-                return ""
-                        
-            licence_name = save_file('hlicproof');
-            logo_name = save_file('hlogo')
-            profile_name = save_file('oprofile');
-            idproof_name = save_file('oidproof')
-            ownership_name = save_file('oownership')
-                        
-            cur.execute("""INSERT INTO hospital (hospital_name,hospital_type,license_number,license_proof,
-                        year_of_establishment,hospital_logo,email_id,hospital_mobile,hospital_mobile_emergency,state,
-                        district,city,pincode,street,area,bed,icu,emergency,ambulence,blood_bank,pharmacy,service,
-                        working_time,opd_time,owner_name,owner_dob,owner_gender,owner_profile,id_type,id_number,
-                        id_proof,owner_type,ownership_proof) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                            (hname, htype, hlic, licence_name, hyear, logo_name, hemail, hmobile, hemcnum, hstate, hdistrict,
-                            hcity, hpin, hstreet, harea, hbed, hicu, hemc, hambulance, hbbank, hpharmacy, hservice, hwtime,
-                            hopdtime, oname, odob, ogender, profile_name, oid, oidnum, idproof_name, otype, ownership_name))
-            con.commit()
-            return '<script>alert("Hospital Registered Successfully! \u2705");window.location.href="/";</script>'
-                        
-        except pymysql.IntegrityError as e:
-            con.rollback()
-            em = "Email already registered!" if "email_id" in str(
-                e) else "Mobile already registered!" if "hospital_mobile" in str(
-                e) else "License number already exists!" if "license_number" in str(e) else "This record already exists."
-            return f'<script>alert("{em}");window.location.href="/";</script>'
         except Exception as e:
             con.rollback()
-            return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'           
+            return f'<script>alert("Hospital Registration Failed: {str(e)}");window.location.href="/";</script>'
 
     # ========== PARENT REGISTRATION ==========
     pregister = form.get("pregister")
@@ -125,100 +85,82 @@ def home():
             pidnum = form.get("pidnum");
             corder = form.get("corder")
         
-            cur.execute("SELECT email_id FROM parent WHERE email_id = %s", (pemail,))
-            if cur.fetchone():
-                return '<script>alert("Email already registered! Please use a different email address.");window.location.href="/";</script>'
-            os.makedirs("image", exist_ok=True)
+           
                     
                     
 
-        except pymysql.IntegrityError as e:
-            con.rollback()
-            em = "Email already registered!" if "email_id" in str(
-                e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
-            return f'<script>alert("{em}");window.location.href="/";</script>'
         except Exception as e:
-            con.rollback()
-            return f'<script>alert("Registration Failed: {str(e)}");window.location.href="/";</script>'
+          con.rollback()
+          em = "Email already registered!" if "email_id" in str(
+            e) else "Mobile already registered!" if "parent_mobile" in str(e) else "This record already exists."
+          return f'<script>alert("{em}");window.location.href="/";</script>'
+    
+        # ========== ADMIN LOGIN ==========
+        admin_submit = form.get("admin_login")
 
-    # ========== FORGOT PASSWORD ==========
-    forgot_password = form.get("forgot_password")
-    if forgot_password is not None:
-        forgot_email = form.get("forgot_email")
-        forgot_user = form.get("forgot_user_id")
-        forgot_role = form.get("forgot_role")
-        try:
-            if forgot_role == "hospital":
-               cur.execute("SELECT password, hospital_name FROM hospital WHERE email_id=%s AND user_id=%s",
-                    (forgot_email, forgot_user))
-               result = cur.fetchone()
-               if result:
-                    pw, name = result
-                    return f'<script>alert("\\u2705 Account Found!\\n\\nHospital Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
-               else:
-                    return '<script>alert("\\u274C Invalid Hospital User ID or Email!");window.location.href="/";</script>'
-            elif forgot_role == "parent":
-                cur.execute("SELECT password, parent_name FROM parent WHERE email_id=%s AND user_id=%s",
-                    (forgot_email, forgot_user))
-                result = cur.fetchone()
-                if result:
-                    pw, name = result
-                    return f'<script>alert("\\u2705 Account Found!\\n\\nParent Name : {name}\\nUser ID : {forgot_user}\\nPassword : {pw}");window.location.href="/";</script>'
-                else:
-                    return '<script>alert("\\u274C Invalid Parent User ID or Email!");window.location.href="/";</script>'
-        except Exception as e:
-            return f'<script>alert("Error: {str(e)}");window.location.href="/";</script>'
-                
-    # ========== LOGIN PROCESSING ==========
-    admin_submit = form.get("admin_login")
-    if admin_submit is not None:
-        userid = form.get("admin_user_id");
-        password = form.get("admin_password")
-        if userid and password:
-            cur.execute("SELECT id FROM admin WHERE user_id = %s AND password = %s", (userid, password))
-            r = cur.fetchone()
-            if r:
-                return f'<script>alert("Admin login successful!");location.href="/admin_dashboard?admin_id={int(r[0])}";</script>'
-            else:
-                return '<script>alert("Invalid Admin credentials!");</script>'
-                
-    hospital_submit = form.get("hospital_login")
-    if hospital_submit is not None:
-        userid = form.get("hospital_user_id");
-        password = form.get("hospital_password")
-        if userid and password:
-            cur.execute("SELECT id FROM hospital WHERE user_id = %s AND password = %s", (userid, password))
-            r = cur.fetchone()
-            if r:
-                return f'<script>alert("Hospital login successful!");location.href="/hospital_dashboard?hospital_id={int(r[0])}";</script>'
-            else:
-                return '<script>alert("Invalid Hospital credentials!");</script>'
-                
-    parent_submit = form.get("parent_login")
-    if parent_submit is not None:
-        userid = form.get("parent_user_id");
-        password = form.get("parent_password")
-        if userid and password:
-            cur.execute("SELECT id FROM parent WHERE user_id = %s AND password = %s", (userid, password))
-            r = cur.fetchone()
-            if r:
-                return f'<script>alert("Parent login successful!");location.href="/parent_dashboard?parent_id={int(r[0])}";</script>'
-            else:
-                return '<script>alert("Invalid Parent credentials!");</script>'
-                
-                
-    # ========== DB COUNTERS ==========
-    def get_count(q):
-        try:
-            cur.execute(q); r = cur.fetchone(); return int(r[0]) if r else 0
-        except:
-            return 0
-                
-    cnt_children = get_count("SELECT COUNT(*) FROM manage_child")
-    cnt_hospitals = get_count("SELECT COUNT(*) FROM hospital")
-    cnt_vaccines = get_count("SELECT COUNT(*) FROM hospital_appointment WHERE status='completed'")
-  
+        if admin_submit is not None:
+            userid = form.get("admin_user_id")
+            password = form.get("admin_password")
 
+            if userid == "admin" and password == "admin123":
+                return '''
+                <script>
+                alert("Admin Login Successful");
+                location.href="/admin_dashboard";
+                </script>
+                '''
+            else:
+                return '''
+                <script>
+                alert("Invalid Admin Login");
+                location.href="/";
+                </script>
+                '''
+
+        # ========== HOSPITAL LOGIN ==========
+        hospital_submit = form.get("hospital_login")
+
+        if hospital_submit is not None:
+            userid = form.get("hospital_user_id")
+            password = form.get("hospital_password")
+
+            if userid == "hospital" and password == "hospital123":
+                return '''
+                <script>
+                alert("Hospital Login Successful");
+                location.href="/hospital_dashboard";
+                </script>
+                '''
+            else:
+                return '''
+                <script>
+                alert("Invalid Hospital Login");
+                location.href="/";
+                </script>
+                '''
+
+        # ========== PARENT LOGIN ==========
+        parent_submit = form.get("parent_login")
+
+        if parent_submit is not None:
+            userid = form.get("parent_user_id")
+            password = form.get("parent_password")
+
+            if userid == "parent" and password == "parent123":
+                return '''
+                <script>
+                alert("Parent Login Successful");
+                location.href="/parent_dashboard";
+                </script>
+                '''
+            else:
+                return '''
+                <script>
+                alert("Invalid Parent Login");
+                location.href="/";
+                </script>
+                '''            
+    
     # ========== HTML ==========
     return f"""<!DOCTYPE html>
     <html lang="en">
@@ -1863,30 +1805,17 @@ function submitTicket() {
 
 @app.route("/submit_ticket", methods=["POST"])
 def submit_ticket():
-    try:
-        full_name = request.form.get("fullName", "").strip()
-        email = request.form.get("contactEmail", "").strip()
-        role = request.form.get("userRole", "")
-        category = request.form.get("issueCategory", "")
-        priority = request.form.get("priority", "")
-        description = request.form.get("issueDescription", "").strip()
+    full_name = request.form.get("fullName", "").strip()
+    email = request.form.get("contactEmail", "").strip()
+    role = request.form.get("userRole", "")
+    category = request.form.get("issueCategory", "")
+    priority = request.form.get("priority", "")
+    description = request.form.get("issueDescription", "").strip()
 
-        if not full_name or not email or not role or not category or not description:
-            return "<script>alert('Please fill all required fields.');window.history.back();</script>"
+    if not full_name or not email or not role or not category or not description:
+        return "<script>alert('Please fill all required fields.');window.history.back();</script>"
 
-        if con:
-            cur.execute(
-                """INSERT INTO support_tickets (full_name, email, role, category, priority, description)
-                   VALUES (%s, %s, %s, %s, %s, %s)""",
-                (full_name, email, role, category, priority, description)
-            )
-            con.commit()
-
-        return "<script>alert('\u2705 Support ticket submitted successfully! We will respond within 24 hours.');window.location.href='/help';</script>"
-    except Exception as e:
-        if con:
-            con.rollback()
-        return f"<script>alert('Ticket submission failed: {str(e)}');window.history.back();</script>"
+    return '<script>alert("Support ticket received. Application is running without a database.");window.location.href="/";</script>'
 
 
 @app.errorhandler(404)
