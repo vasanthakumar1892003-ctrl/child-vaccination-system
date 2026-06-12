@@ -120,12 +120,12 @@ def home():
         password = form.get("hospital_password")
 
         if userid == "hospital" and password == "hospital123":
-            return '''
-            <script>
-            alert("Hospital Login Successful");
-            location.href="/hospital_dashboard";
-            </script>
-            '''
+          return '''
+          <script>
+          alert("Hospital Login Successful");
+          location.href="/hospital_dashboard?hospital_id=0";
+          </script>
+          '''
         else:
             return '''
             <script>
@@ -2698,6 +2698,164 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
 
 </body>
 </html>""")
+
+
+app = Flask(__name__)
+
+
+# --- Dummy DB stubs (no database required) ---
+class DummyCursor:
+    def execute(self, *args, **kwargs):
+        return None
+    def fetchone(self):
+        return None
+    def fetchall(self):
+        return []
+
+
+class DummyConnection:
+    def cursor(self):
+        return DummyCursor()
+    def close(self):
+        return None
+    def commit(self):
+        pass
+    def rollback(self):
+        pass
+
+
+con = DummyConnection()
+cur = con.cursor()
+
+
+@app.route("/", methods=["GET", "POST"])
+def home():
+    form = request.form
+
+    # simple login handling (no DB)
+    if form.get("admin_login"):
+        if form.get("admin_user_id") == "admin" and form.get("admin_password") == "admin123":
+            return "<script>alert('Admin Login Successful');location.href='/admin_dashboard';</script>"
+        return "<script>alert('Invalid Admin Login');location.href='/';</script>"
+
+    if form.get("hospital_login"):
+        if form.get("hospital_user_id") == "hospital" and form.get("hospital_password") == "hospital123":
+            return "<script>alert('Hospital Login Successful');location.href='/hospital_dashboard?hospital_id=0';</script>"
+        return "<script>alert('Invalid Hospital Login');location.href='/';</script>"
+
+    if form.get("parent_login"):
+        if form.get("parent_user_id") == "parent" and form.get("parent_password") == "parent123":
+            return "<script>alert('Parent Login Successful');location.href='/parent_dashboard';</script>"
+        return "<script>alert('Invalid Parent Login');location.href='/';</script>"
+
+    # minimal home page with login buttons
+    return render_template_string(r"""
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVS - Home (DB-free)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <h1 class="mb-4">Child Vaccination System (DB-free)</h1>
+      <div class="row">
+        <div class="col-md-6">
+          <form method="post">
+            <h4>Admin Login</h4>
+            <input name="admin_user_id" class="form-control mb-2" placeholder="User ID">
+            <input name="admin_password" type="password" class="form-control mb-2" placeholder="Password">
+            <button name="admin_login" class="btn btn-primary">Login as Admin</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <form method="post">
+            <h4>Hospital Login</h4>
+            <input name="hospital_user_id" class="form-control mb-2" placeholder="User ID">
+            <input name="hospital_password" type="password" class="form-control mb-2" placeholder="Password">
+            <button name="hospital_login" class="btn btn-primary">Login as Hospital</button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-4">
+        <a href="/help" class="btn btn-outline-secondary">Help & Support</a>
+      </div>
+    </div>
+  </body>
+</html>
+""")
+
+
+@app.route("/hospital_dashboard")
+def hospital_dashboard():
+    hospital_id = request.args.get("hospital_id", "0").strip() or "0"
+    stats = {
+        "hospital_id": hospital_id,
+        "total_appointments": 42,
+        "today_appointments": 3,
+        "future_appointments": 7,
+        "delay_appointments": 1,
+        "completed_vaccination": 28,
+        "pending_vaccination": 5,
+        "cancelled_vaccination": 2,
+        "pending_applications": 4,
+        "approved_applications": 10,
+        "rejected_applications": 0,
+    }
+    return render_template_string(r"""
+<h2>Hospital Dashboard (DB-free)</h2>
+<p>Hospital ID: {{ hospital_id }}</p>
+<ul>
+  <li>Total appointments: {{ total_appointments }}</li>
+  <li>Today's appointments: {{ today_appointments }}</li>
+  <li>Future: {{ future_appointments }}</li>
+  <li>Overdue: {{ delay_appointments }}</li>
+</ul>
+<p><a href="/">Back to Home</a></p>
+""", **stats)
+
+
+@app.route("/admin_dashboard")
+def admin_dashboard():
+    return render_template_string(r"""
+<h2>Admin Dashboard (DB-free)</h2>
+<p>This is a placeholder admin dashboard. The app is running without a database.</p>
+<p><a href="/">Back to Home</a></p>
+""")
+
+
+@app.route("/help")
+def help_page():
+    return render_template_string(r"""
+<h2>Help & Support</h2>
+<p>For support, email: childvaccinationsystem2026@gmail.com</p>
+<p><a href="/">Back to Home</a></p>
+""")
+
+
+@app.route("/submit_ticket", methods=["POST"])
+def submit_ticket():
+    full_name = request.form.get("fullName", "").strip()
+    email = request.form.get("contactEmail", "").strip()
+    role = request.form.get("userRole", "")
+    category = request.form.get("issueCategory", "")
+    description = request.form.get("issueDescription", "").strip()
+
+    if not full_name or not email or not role or not category or not description:
+        return "<script>alert('Please fill all required fields.');window.history.back();</script>"
+
+    return "<script>alert('Support ticket received. Application is running without a database.');window.location.href='/';</script>"
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template_string(r"""
+<h2>404 — Page Not Found</h2>
+<p><a href="/">Back to Home</a></p>
+"""), 404
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
