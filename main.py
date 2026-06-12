@@ -162,6 +162,9 @@ def home():
                 '''            
     
     # ========== HTML ==========
+    cnt_children = 0
+    cnt_hospitals = 0
+    cnt_vaccines = 0
     return f"""<!DOCTYPE html>
     <html lang="en">
     <head>
