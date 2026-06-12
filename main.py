@@ -2045,7 +2045,6 @@ body {
   overflow: hidden;
   cursor: pointer;
   min-height: 160px;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
